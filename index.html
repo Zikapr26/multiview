@@ -2,83 +2,94 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>MultiView Pro - zikapr26</title>
+    <title>MultiView Ultimate - zikapr26</title>
     <style>
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        #toolbar { background: #1a1a1a; padding: 10px; display: flex; gap: 10px; align-items: center; border-bottom: 2px solid #333; z-index: 100; flex-wrap: wrap; }
-        input { background: #000; border: 1px solid #444; color: #fff; padding: 6px; border-radius: 4px; width: 180px; font-size: 11px; }
-        button { background: #cc0000; color: white; border: none; padding: 7px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; }
-        button:hover { background: #ff0000; }
-        .group { display: flex; align-items: center; gap: 8px; border-left: 1px solid #444; padding-left: 10px; }
+        #toolbar { background: #1a1a1a; padding: 10px; display: flex; gap: 8px; align-items: center; border-bottom: 2px solid #333; z-index: 100; flex-wrap: wrap; }
+        input { background: #000; border: 1px solid #444; color: #fff; padding: 6px; border-radius: 4px; width: 140px; font-size: 11px; }
+        button { background: #cc0000; color: white; border: none; padding: 7px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; }
+        .group { display: flex; align-items: center; gap: 8px; border-left: 1px solid #444; padding-left: 10px; font-size: 11px; }
         
         #main { display: flex; flex: 1; overflow: hidden; width: 100%; }
-        #content-area { display: flex; flex: 1; background: #000; position: relative; }
+        #content-area { display: flex; flex-direction: column; flex: 1; background: #000; }
         
-        .layout-vertical { flex-direction: column; }
-        .layout-horizontal { flex-direction: row; }
+        #top-row { display: flex; height: 50%; border-bottom: 2px solid #333; }
+        #v1-container { width: 50%; border-right: 2px solid #333; }
+        #v2-container { flex: 1; }
+        #bottom-row { height: 50%; width: 100%; }
 
-        .box { position: relative; overflow: hidden; background: #000; display: flex; }
-        iframe { width: 100%; height: 100%; border: none; flex: 1; }
+        iframe { width: 100%; height: 100%; border: none; }
 
-        #chat-area { width: 350px; background: #0f0f0f; display: flex; flex-direction: column; border-left: 2px solid #333; }
+        #chat-area { width: 300px; background: #0f0f0f; display: flex; flex-direction: column; border-left: 2px solid #333; }
         .chat-header { padding: 8px; background: #1a1a1a; text-align: center; font-size: 11px; font-weight: bold; border-bottom: 1px solid #333; }
         .hide { display: none !important; }
         .active-btn { background: #065fd4 !important; }
+        input[type="range"] { width: 70px; accent-color: #ff0000; }
     </style>
 </head>
 <body>
 
     <div id="toolbar">
-        <input type="text" id="in1" placeholder="Live do YouTube">
-        <input type="text" id="in2" placeholder="Site Helios ou Mapa">
+        <input type="text" id="in1" placeholder="Live 1">
+        <input type="text" id="in2" placeholder="Live 2">
+        <input type="text" id="in3" placeholder="Helios/Mapa">
         <button onclick="carregar()">CARREGAR</button>
-        <button onclick="salvar()" style="background:#28a745">SALVAR LINKS</button>
+        <button onclick="salvar()" style="background:#28a745">SALVAR</button>
 
         <div class="group">
-            <button onclick="mudarLayout('horizontal')" id="btnHoriz">LADO A LADO</button>
-            <button onclick="mudarLayout('vertical')" id="btnVert" class="active-btn">PILHA</button>
+            <span>Largura L1:</span>
+            <input type="range" min="10" max="90" value="50" oninput="ajustarLargura(this.value)">
         </div>
 
         <div class="group">
-            <span>Ajuste:</span>
-            <input type="range" min="10" max="90" value="50" oninput="redimensionar(this.value)">
+            <span>Altura Superior:</span>
+            <input type="range" min="10" max="90" value="50" oninput="ajustarAltura(this.value)">
         </div>
 
         <div class="group">
-            <span>Chat:</span>
-            <button id="bc1" onclick="swapChat(1)" class="active-btn">L1</button>
-            <button id="bc2" onclick="swapChat(2)">L2</button>
-            <button onclick="toggleChat()" id="btnChatToggle" class="active-btn">EXIBIR</button>
+            <span>Largura Chat:</span>
+            <input type="range" min="150" max="600" value="300" oninput="ajustarChat(this.value)">
+        </div>
+
+        <div class="group">
+            <button id="bc1" onclick="swapChat(1)" class="active-btn">CHAT L1</button>
+            <button id="bc2" onclick="swapChat(2)">CHAT L2</button>
+            <button onclick="toggleChat()">EXIBIR</button>
         </div>
     </div>
 
     <div id="main">
-        <div id="content-area" class="layout-vertical">
-            <div id="box1" class="box" style="height: 50%; width: 100%;"><iframe id="v1"></iframe></div>
-            <div id="box2" class="box" style="height: 50%; width: 100%;"><iframe id="v2"></iframe></div>
+        <div id="content-area">
+            <div id="top-row">
+                <div id="v1-container"><iframe id="v1"></iframe></div>
+                <div id="v2-container"><iframe id="v2"></iframe></div>
+            </div>
+            <div id="bottom-row">
+                <iframe id="v3"></iframe>
+            </div>
         </div>
         <div id="chat-area">
             <div class="chat-header" id="chat-title">CHAT: LIVE 1</div>
-            <iframe id="chat-frame" src=""></iframe>
+            <iframe id="chat-frame"></iframe>
         </div>
     </div>
 
     <script>
-        let id1 = "", id2 = "", currentLayout = 'vertical';
+        let ids = ["", ""];
 
-        // Carrega links salvos ao abrir a página
         window.onload = function() {
-            const s1 = localStorage.getItem('link1');
-            const s2 = localStorage.getItem('link2');
-            if(s1) document.getElementById('in1').value = s1;
-            if(s2) document.getElementById('in2').value = s2;
-            if(s1 || s2) carregar();
+            const s = [localStorage.getItem('l1'), localStorage.getItem('l2'), localStorage.getItem('l3')];
+            if(s[0]) document.getElementById('in1').value = s[0];
+            if(s[1]) document.getElementById('in2').value = s[1];
+            if(s[2]) document.getElementById('in3').value = s[2];
+            if(s[0] || s[1] || s[2]) carregar();
         };
 
         function salvar() {
-            localStorage.setItem('link1', document.getElementById('in1').value);
-            localStorage.setItem('link2', document.getElementById('in2').value);
-            alert("Links salvos com sucesso!");
+            localStorage.setItem('l1', document.getElementById('in1').value);
+            localStorage.setItem('l2', document.getElementById('in2').value);
+            localStorage.setItem('l3', document.getElementById('in3').value);
+            alert("Links salvos!");
         }
 
         function getID(url) {
@@ -88,67 +99,30 @@
         }
 
         function carregar() {
-            const val1 = document.getElementById('in1').value;
-            const val2 = document.getElementById('in2').value;
-            
-            id1 = getID(val1);
-            if(id1) document.getElementById('v1').src = `https://www.youtube.com/embed/${id1}?autoplay=1`;
-
-            id2 = getID(val2);
-            if(id2) {
-                document.getElementById('v2').src = `https://www.youtube.com/embed/${id2}?autoplay=1`;
-            } else if(val2.includes("http")) {
-                document.getElementById('v2').src = val2;
-            }
+            ids[0] = getID(document.getElementById('in1').value);
+            ids[1] = getID(document.getElementById('in2').value);
+            const val3 = document.getElementById('in3').value;
+            if(ids[0]) document.getElementById('v1').src = `https://www.youtube.com/embed/${ids[0]}?autoplay=1`;
+            if(ids[1]) document.getElementById('v2').src = `https://www.youtube.com/embed/${ids[1]}?autoplay=1`;
+            if(val3) document.getElementById('v3').src = val3;
             swapChat(1);
         }
 
-        function mudarLayout(tipo) {
-            const area = document.getElementById('content-area');
-            const b1 = document.getElementById('box1');
-            const b2 = document.getElementById('box2');
-            currentLayout = tipo;
-            area.className = tipo === 'vertical' ? 'layout-vertical' : 'layout-horizontal';
-            document.getElementById('btnVert').classList.toggle('active-btn', tipo === 'vertical');
-            document.getElementById('btnHoriz').classList.toggle('active-btn', tipo === 'horizontal');
-            b1.style.width = tipo === 'vertical' ? "100%" : "50%";
-            b1.style.height = tipo === 'vertical' ? "50%" : "100%";
-            b2.style.width = tipo === 'vertical' ? "100%" : "50%";
-            b2.style.height = tipo === 'vertical' ? "50%" : "100%";
+        function ajustarLargura(val) { document.getElementById('v1-container').style.width = val + "%"; }
+        function ajustarAltura(val) {
+            document.getElementById('top-row').style.height = val + "%";
+            document.getElementById('bottom-row').style.height = (100 - val) + "%";
         }
-
-        function redimensionar(val) {
-            const b1 = document.getElementById('box1');
-            const b2 = document.getElementById('box2');
-            if(currentLayout === 'vertical') {
-                b1.style.height = val + "%";
-                b2.style.height = (100 - val) + "%";
-            } else {
-                b1.style.width = val + "%";
-                b2.style.width = (100 - val) + "%";
-            }
-        }
-
-        function toggleChat() {
-            const chat = document.getElementById('chat-area');
-            const btn = document.getElementById('btnChatToggle');
-            chat.classList.toggle('hide');
-            btn.classList.toggle('active-btn');
-            btn.innerText = chat.classList.contains('hide') ? "MOSTRAR" : "OCULTAR";
-        }
+        function ajustarChat(val) { document.getElementById('chat-area').style.width = val + "px"; }
+        function toggleChat() { document.getElementById('chat-area').classList.toggle('hide'); }
 
         function swapChat(n) {
-            const tid = (n === 1) ? id1 : id2;
+            const tid = ids[n-1];
             const domain = window.location.hostname;
             document.getElementById('bc1').classList.toggle('active-btn', n === 1);
             document.getElementById('bc2').classList.toggle('active-btn', n === 2);
             document.getElementById('chat-title').innerText = "CHAT: LIVE " + n;
-            if(tid) {
-                document.getElementById('chat-frame').src = `https://www.youtube.com/live_chat?v=${tid}&embed_domain=${domain}`;
-            } else {
-                document.getElementById('chat-frame').src = "";
-                document.getElementById('chat-title').innerText = "CHAT INDISPONÍVEL";
-            }
+            if(tid) document.getElementById('chat-frame').src = `https://www.youtube.com/live_chat?v=${tid}&embed_domain=${domain}`;
         }
     </script>
 </body>
