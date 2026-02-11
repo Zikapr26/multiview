@@ -2,14 +2,19 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>MultiView Ultimate - zikapr26</title>
+    <title>MultiView Ultimate Pro - zikapr26</title>
     <style>
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        #toolbar { background: #1a1a1a; padding: 10px; display: flex; gap: 8px; align-items: center; border-bottom: 2px solid #333; z-index: 100; flex-wrap: wrap; }
+        #toolbar { background: #1a1a1a; padding: 10px; display: flex; gap: 8px; align-items: center; border-bottom: 2px solid #333; z-index: 100; flex-wrap: wrap; transition: 0.3s; }
+        .toolbar-hidden { margin-top: -120px; opacity: 0; pointer-events: none; }
+        
         input { background: #000; border: 1px solid #444; color: #fff; padding: 6px; border-radius: 4px; width: 140px; font-size: 11px; }
         button { background: #cc0000; color: white; border: none; padding: 7px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; }
         .group { display: flex; align-items: center; gap: 8px; border-left: 1px solid #444; padding-left: 10px; font-size: 11px; }
         
+        #show-menu-btn { position: fixed; top: 0; left: 50%; transform: translateX(-50%); background: #333; padding: 5px 15px; border-radius: 0 0 10px 10px; z-index: 101; cursor: pointer; opacity: 0.3; font-size: 10px; }
+        #show-menu-btn:hover { opacity: 1; background: #cc0000; }
+
         #main { display: flex; flex: 1; overflow: hidden; width: 100%; }
         #content-area { display: flex; flex-direction: column; flex: 1; background: #000; }
         
@@ -24,12 +29,14 @@
         .chat-header { padding: 8px; background: #1a1a1a; text-align: center; font-size: 11px; font-weight: bold; border-bottom: 1px solid #333; }
         .hide { display: none !important; }
         .active-btn { background: #065fd4 !important; }
-        input[type="range"] { width: 70px; accent-color: #ff0000; }
+        input[type="range"] { width: 60px; accent-color: #ff0000; }
     </style>
 </head>
 <body>
 
-    <div id="toolbar">
+    <div id="show-menu-btn" onclick="toggleMenu()">MOSTRAR MENU</div>
+
+    <div id="toolbar" id="toolbar">
         <input type="text" id="in1" placeholder="Live 1">
         <input type="text" id="in2" placeholder="Live 2">
         <input type="text" id="in3" placeholder="Helios/Mapa">
@@ -37,24 +44,16 @@
         <button onclick="salvar()" style="background:#28a745">SALVAR</button>
 
         <div class="group">
-            <span>Largura L1:</span>
-            <input type="range" min="10" max="90" value="50" oninput="ajustarLargura(this.value)">
-        </div>
-
-        <div class="group">
-            <span>Altura Superior:</span>
-            <input type="range" min="10" max="90" value="50" oninput="ajustarAltura(this.value)">
-        </div>
-
-        <div class="group">
-            <span>Largura Chat:</span>
-            <input type="range" min="150" max="600" value="300" oninput="ajustarChat(this.value)">
+            <span>L1:</span><input type="range" min="10" max="90" value="50" oninput="ajustarLargura(this.value)">
+            <span>Alt:</span><input type="range" min="10" max="90" value="50" oninput="ajustarAltura(this.value)">
+            <span>Chat:</span><input type="range" min="150" max="600" value="300" oninput="ajustarChat(this.value)">
         </div>
 
         <div class="group">
             <button id="bc1" onclick="swapChat(1)" class="active-btn">CHAT L1</button>
             <button id="bc2" onclick="swapChat(2)">CHAT L2</button>
-            <button onclick="toggleChat()">EXIBIR</button>
+            <button onclick="toggleChat()">CHAT</button>
+            <button onclick="toggleMenu()" style="background:#444">OCULTAR MENU</button>
         </div>
     </div>
 
@@ -115,6 +114,10 @@
         }
         function ajustarChat(val) { document.getElementById('chat-area').style.width = val + "px"; }
         function toggleChat() { document.getElementById('chat-area').classList.toggle('hide'); }
+        
+        function toggleMenu() {
+            document.getElementById('toolbar').classList.toggle('toolbar-hidden');
+        }
 
         function swapChat(n) {
             const tid = ids[n-1];
