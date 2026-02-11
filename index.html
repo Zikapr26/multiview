@@ -2,86 +2,56 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>MultiView Ultimate Pro - zikapr26</title>
+    <title>MultiView Desktop - zikapr26</title>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <style>
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        #toolbar { background: #1a1a1a; padding: 10px; display: flex; gap: 8px; align-items: center; border-bottom: 2px solid #333; z-index: 100; flex-wrap: wrap; transition: 0.3s; }
-        .toolbar-hidden { margin-top: -120px; opacity: 0; pointer-events: none; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: white; height: 100vh; overflow: hidden; }
+        #desktop { width: 100%; height: 100%; position: relative; background: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1920&q=80') center/cover; }
         
-        input { background: #000; border: 1px solid #444; color: #fff; padding: 6px; border-radius: 4px; width: 140px; font-size: 11px; }
-        button { background: #cc0000; color: white; border: none; padding: 7px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; }
-        .group { display: flex; align-items: center; gap: 8px; border-left: 1px solid #444; padding-left: 10px; font-size: 11px; }
+        #toolbar { background: rgba(26, 26, 26, 0.9); padding: 10px; display: flex; gap: 10px; align-items: center; border-bottom: 2px solid #333; position: relative; z-index: 1000; flex-wrap: wrap; }
+        input { background: #000; border: 1px solid #444; color: #fff; padding: 6px; border-radius: 4px; width: 180px; font-size: 11px; }
+        button { background: #cc0000; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; }
         
-        #show-menu-btn { position: fixed; top: 0; left: 50%; transform: translateX(-50%); background: #333; padding: 5px 15px; border-radius: 0 0 10px 10px; z-index: 101; cursor: pointer; opacity: 0.3; font-size: 10px; }
-        #show-menu-btn:hover { opacity: 1; background: #cc0000; }
-
-        #main { display: flex; flex: 1; overflow: hidden; width: 100%; }
-        #content-area { display: flex; flex-direction: column; flex: 1; background: #000; }
-        
-        #top-row { display: flex; height: 50%; border-bottom: 2px solid #333; }
-        #v1-container { width: 50%; border-right: 2px solid #333; }
-        #v2-container { flex: 1; }
-        #bottom-row { height: 50%; width: 100%; }
-
+        .window { position: absolute; background: #1a1a1a; border: 2px solid #333; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden; display: flex; flex-direction: column; min-width: 200px; min-height: 150px; }
+        .window-header { background: #333; padding: 8px; cursor: move; display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: bold; }
+        .window-content { flex: 1; position: relative; background: #000; }
         iframe { width: 100%; height: 100%; border: none; }
-
-        #chat-area { width: 300px; background: #0f0f0f; display: flex; flex-direction: column; border-left: 2px solid #333; }
-        .chat-header { padding: 8px; background: #1a1a1a; text-align: center; font-size: 11px; font-weight: bold; border-bottom: 1px solid #333; }
-        .hide { display: none !important; }
-        .active-btn { background: #065fd4 !important; }
-        input[type="range"] { width: 60px; accent-color: #ff0000; }
+        
+        .close-btn { color: #ff5555; cursor: pointer; font-weight: bold; padding: 0 5px; }
+        .toolbar-hidden { display: none !important; }
+        #show-menu { position: fixed; bottom: 10px; right: 10px; background: #cc0000; padding: 10px; border-radius: 50%; cursor: pointer; z-index: 2000; display: none; }
     </style>
 </head>
 <body>
 
-    <div id="show-menu-btn" onclick="toggleMenu()">MOSTRAR MENU</div>
-
-    <div id="toolbar" id="toolbar">
-        <input type="text" id="in1" placeholder="Live 1">
-        <input type="text" id="in2" placeholder="Live 2">
-        <input type="text" id="in3" placeholder="Helios/Mapa">
-        <button onclick="carregar()">CARREGAR</button>
-        <button onclick="salvar()" style="background:#28a745">SALVAR</button>
-
-        <div class="group">
-            <span>L1:</span><input type="range" min="10" max="90" value="50" oninput="ajustarLargura(this.value)">
-            <span>Alt:</span><input type="range" min="10" max="90" value="50" oninput="ajustarAltura(this.value)">
-            <span>Chat:</span><input type="range" min="150" max="600" value="300" oninput="ajustarChat(this.value)">
-        </div>
-
-        <div class="group">
-            <button id="bc1" onclick="swapChat(1)" class="active-btn">CHAT L1</button>
-            <button id="bc2" onclick="swapChat(2)">CHAT L2</button>
-            <button onclick="toggleChat()">CHAT</button>
-            <button onclick="toggleMenu()" style="background:#444">OCULTAR MENU</button>
-        </div>
+    <div id="toolbar">
+        <input type="text" id="in1" placeholder="Link Live 1">
+        <input type="text" id="in2" placeholder="Link Live 2">
+        <input type="text" id="in3" placeholder="Link Helios/Mapa">
+        <button onclick="criarJanela(1)">ABRIR L1</button>
+        <button onclick="criarJanela(2)">ABRIR L2</button>
+        <button onclick="criarJanela(3)">ABRIR HELIOS</button>
+        <button onclick="salvar()" style="background:#28a745">SALVAR LINKS</button>
+        <button onclick="toggleToolbar()" style="background:#444">OCULTAR MENU</button>
     </div>
 
-    <div id="main">
-        <div id="content-area">
-            <div id="top-row">
-                <div id="v1-container"><iframe id="v1"></iframe></div>
-                <div id="v2-container"><iframe id="v2"></iframe></div>
-            </div>
-            <div id="bottom-row">
-                <iframe id="v3"></iframe>
-            </div>
-        </div>
-        <div id="chat-area">
-            <div class="chat-header" id="chat-title">CHAT: LIVE 1</div>
-            <iframe id="chat-frame"></iframe>
-        </div>
-    </div>
+    <div id="show-menu" onclick="toggleToolbar()">☰</div>
 
+    <div id="desktop"></div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
     <script>
-        let ids = ["", ""];
+        function getID(url) {
+            const reg = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+            const m = url.match(reg);
+            return (m && m[1]) ? m[1] : null;
+        }
 
         window.onload = function() {
-            const s = [localStorage.getItem('l1'), localStorage.getItem('l2'), localStorage.getItem('l3')];
-            if(s[0]) document.getElementById('in1').value = s[0];
-            if(s[1]) document.getElementById('in2').value = s[1];
-            if(s[2]) document.getElementById('in3').value = s[2];
-            if(s[0] || s[1] || s[2]) carregar();
+            document.getElementById('in1').value = localStorage.getItem('l1') || "";
+            document.getElementById('in2').value = localStorage.getItem('l2') || "";
+            document.getElementById('in3').value = localStorage.getItem('l3') || "";
         };
 
         function salvar() {
@@ -91,41 +61,45 @@
             alert("Links salvos!");
         }
 
-        function getID(url) {
-            const reg = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-            const m = url.match(reg);
-            return (m && m[1]) ? m[1] : null;
+        function toggleToolbar() {
+            $("#toolbar").toggleClass("toolbar-hidden");
+            $("#show-menu").toggle();
         }
 
-        function carregar() {
-            ids[0] = getID(document.getElementById('in1').value);
-            ids[1] = getID(document.getElementById('in2').value);
-            const val3 = document.getElementById('in3').value;
-            if(ids[0]) document.getElementById('v1').src = `https://www.youtube.com/embed/${ids[0]}?autoplay=1`;
-            if(ids[1]) document.getElementById('v2').src = `https://www.youtube.com/embed/${ids[1]}?autoplay=1`;
-            if(val3) document.getElementById('v3').src = val3;
-            swapChat(1);
-        }
+        function criarJanela(tipo) {
+            const urlRaw = document.getElementById('in' + tipo).value;
+            if(!urlRaw) return alert("Cole o link primeiro!");
 
-        function ajustarLargura(val) { document.getElementById('v1-container').style.width = val + "%"; }
-        function ajustarAltura(val) {
-            document.getElementById('top-row').style.height = val + "%";
-            document.getElementById('bottom-row').style.height = (100 - val) + "%";
-        }
-        function ajustarChat(val) { document.getElementById('chat-area').style.width = val + "px"; }
-        function toggleChat() { document.getElementById('chat-area').classList.toggle('hide'); }
-        
-        function toggleMenu() {
-            document.getElementById('toolbar').classList.toggle('toolbar-hidden');
-        }
+            let finalUrl = urlRaw;
+            let titulo = "Janela " + tipo;
 
-        function swapChat(n) {
-            const tid = ids[n-1];
-            const domain = window.location.hostname;
-            document.getElementById('bc1').classList.toggle('active-btn', n === 1);
-            document.getElementById('bc2').classList.toggle('active-btn', n === 2);
-            document.getElementById('chat-title').innerText = "CHAT: LIVE " + n;
-            if(tid) document.getElementById('chat-frame').src = `https://www.youtube.com/live_chat?v=${tid}&embed_domain=${domain}`;
+            if(tipo < 3) {
+                const id = getID(urlRaw);
+                if(id) {
+                    finalUrl = `https://www.youtube.com/embed/${id}?autoplay=1`;
+                    titulo = "Live " + tipo;
+                }
+            } else {
+                titulo = "Rastreador Helios";
+                // Truque para o Helios carregar melhor: garantir que o link seja https
+                finalUrl = urlRaw.startsWith("http") ? urlRaw : "https://" + urlRaw;
+            }
+
+            const winId = "win-" + Date.now();
+            const winHtml = `
+                <div id="${winId}" class="window" style="width: 400px; height: 300px; top: 100px; left: ${tipo * 50}px;">
+                    <div class="window-header">
+                        <span>${titulo}</span>
+                        <span class="close-btn" onclick="$('#${winId}').remove()">X</span>
+                    </div>
+                    <div class="window-content">
+                        <iframe src="${finalUrl}"></iframe>
+                    </div>
+                </div>
+            `;
+
+            $("#desktop").append(winHtml);
+            $("#" + winId).draggable({ handle: ".window-header", containment: "#desktop" }).resizable();
         }
     </script>
 </body>
