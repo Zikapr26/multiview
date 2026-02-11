@@ -2,57 +2,117 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>MultiView Desktop - zikapr26</title>
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <title>MultiView Ajustável - zikapr26</title>
     <style>
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: white; height: 100vh; overflow: hidden; }
-        #desktop { width: 100%; height: 100%; position: relative; background: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1920&q=80') center/cover; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        #toolbar { background: rgba(26, 26, 26, 0.9); padding: 10px; display: flex; gap: 10px; align-items: center; border-bottom: 2px solid #333; position: relative; z-index: 1000; flex-wrap: wrap; }
-        input { background: #000; border: 1px solid #444; color: #fff; padding: 6px; border-radius: 4px; width: 180px; font-size: 11px; }
-        button { background: #cc0000; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; }
+        /* Barra de Ferramentas */
+        #toolbar { background: #1a1a1a; padding: 10px; display: flex; gap: 8px; align-items: center; border-bottom: 2px solid #333; z-index: 100; flex-wrap: wrap; }
+        input { background: #000; border: 1px solid #444; color: #fff; padding: 6px; border-radius: 4px; width: 140px; font-size: 11px; }
+        button { background: #cc0000; color: white; border: none; padding: 7px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; }
+        .toolbar-hidden { display: none; }
+
+        /* Estrutura Principal */
+        #main-container { display: flex; flex: 1; width: 100%; height: 100%; overflow: hidden; }
         
-        .window { position: absolute; background: #1a1a1a; border: 2px solid #333; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden; display: flex; flex-direction: column; min-width: 200px; min-height: 150px; }
-        .window-header { background: #333; padding: 8px; cursor: move; display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: bold; }
-        .window-content { flex: 1; position: relative; background: #000; }
-        iframe { width: 100%; height: 100%; border: none; }
+        /* Área das Lives e Helios */
+        #content-area { display: flex; flex-direction: column; flex: 1; height: 100%; }
         
-        .close-btn { color: #ff5555; cursor: pointer; font-weight: bold; padding: 0 5px; }
-        .toolbar-hidden { display: none !important; }
-        #show-menu { position: fixed; bottom: 10px; right: 10px; background: #cc0000; padding: 10px; border-radius: 50%; cursor: pointer; z-index: 2000; display: none; }
+        /* Divisores Arrastáveis */
+        .gutter-v { cursor: row-resize; background: #333; height: 6px; width: 100%; }
+        .gutter-h { cursor: col-resize; background: #333; width: 6px; height: 100%; }
+
+        #top-row { display: flex; height: 50%; }
+        .v-container { height: 100%; position: relative; }
+        #v1-box { width: 50%; }
+        #v2-box { flex: 1; }
+        
+        #bottom-row { flex: 1; width: 100%; position: relative; }
+
+        iframe { width: 100%; height: 100%; border: none; background: #000; }
+
+        /* Barra de Chat */
+        #chat-area { width: 300px; background: #0f0f0f; display: flex; flex-direction: column; border-left: 1px solid #333; }
+        .chat-header { padding: 8px; background: #1a1a1a; text-align: center; font-size: 11px; font-weight: bold; border-bottom: 1px solid #333; }
+        .hide { display: none !important; }
     </style>
 </head>
 <body>
 
     <div id="toolbar">
-        <input type="text" id="in1" placeholder="Link Live 1">
-        <input type="text" id="in2" placeholder="Link Live 2">
-        <input type="text" id="in3" placeholder="Link Helios/Mapa">
-        <button onclick="criarJanela(1)">ABRIR L1</button>
-        <button onclick="criarJanela(2)">ABRIR L2</button>
-        <button onclick="criarJanela(3)">ABRIR HELIOS</button>
-        <button onclick="salvar()" style="background:#28a745">SALVAR LINKS</button>
-        <button onclick="toggleToolbar()" style="background:#444">OCULTAR MENU</button>
+        <input type="text" id="in1" placeholder="Live 1">
+        <input type="text" id="in2" placeholder="Live 2">
+        <input type="text" id="in3" placeholder="Helios/Mapa">
+        <button onclick="carregar()">CARREGAR</button>
+        <button onclick="salvar()" style="background:#28a745">SALVAR</button>
+        <button onclick="toggleChat()" style="background:#065fd4">CHAT</button>
+        <button onclick="document.getElementById('toolbar').classList.toggle('toolbar-hidden')" style="background:#444">MENU</button>
     </div>
 
-    <div id="show-menu" onclick="toggleToolbar()">☰</div>
+    <div id="main-container">
+        <div id="content-area">
+            <div id="top-row">
+                <div id="v1-box" class="v-container"><iframe id="v1"></iframe></div>
+                <div class="gutter-h" onmousedown="initResizeH(event)"></div>
+                <div id="v2-box" class="v-container"><iframe id="v2"></iframe></div>
+            </div>
+            <div class="gutter-v" onmousedown="initResizeV(event)"></div>
+            <div id="bottom-row">
+                <iframe id="v3"></iframe>
+            </div>
+        </div>
+        <div id="chat-area">
+            <div class="chat-header">CHAT SELECIONADO</div>
+            <iframe id="chat-frame"></iframe>
+        </div>
+    </div>
 
-    <div id="desktop"></div>
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
     <script>
+        // Funções de Arrastar Manualmente
+        function initResizeH(e) {
+            window.addEventListener('mousemove', resizeH);
+            window.addEventListener('mouseup', stopResize);
+        }
+        function resizeH(e) {
+            const box1 = document.getElementById('v1-box');
+            const newWidth = (e.clientX / window.innerWidth) * 100;
+            box1.style.width = newWidth + '%';
+        }
+        function initResizeV(e) {
+            window.addEventListener('mousemove', resizeV);
+            window.addEventListener('mouseup', stopResize);
+        }
+        function resizeV(e) {
+            const topRow = document.getElementById('top-row');
+            const newHeight = (e.clientY / window.innerHeight) * 100;
+            topRow.style.height = newHeight + '%';
+        }
+        function stopResize() {
+            window.removeEventListener('mousemove', resizeH);
+            window.removeEventListener('mousemove', resizeV);
+        }
+
+        // Lógica de Carregamento e Chat
         function getID(url) {
             const reg = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
             const m = url.match(reg);
             return (m && m[1]) ? m[1] : null;
         }
 
-        window.onload = function() {
-            document.getElementById('in1').value = localStorage.getItem('l1') || "";
-            document.getElementById('in2').value = localStorage.getItem('l2') || "";
-            document.getElementById('in3').value = localStorage.getItem('l3') || "";
-        };
+        function carregar() {
+            const l1 = document.getElementById('in1').value;
+            const l2 = document.getElementById('in2').value;
+            const l3 = document.getElementById('in3').value;
+            
+            const id1 = getID(l1);
+            if(id1) {
+                document.getElementById('v1').src = `https://www.youtube.com/embed/${id1}?autoplay=1`;
+                document.getElementById('chat-frame').src = `https://www.youtube.com/live_chat?v=${id1}&embed_domain=${window.location.hostname}`;
+            }
+            const id2 = getID(l2);
+            if(id2) document.getElementById('v2').src = `https://www.youtube.com/embed/${id2}?autoplay=1`;
+            if(l3) document.getElementById('v3').src = l3;
+        }
 
         function salvar() {
             localStorage.setItem('l1', document.getElementById('in1').value);
@@ -61,45 +121,13 @@
             alert("Links salvos!");
         }
 
-        function toggleToolbar() {
-            $("#toolbar").toggleClass("toolbar-hidden");
-            $("#show-menu").toggle();
-        }
+        function toggleChat() { document.getElementById('chat-area').classList.toggle('hide'); }
 
-        function criarJanela(tipo) {
-            const urlRaw = document.getElementById('in' + tipo).value;
-            if(!urlRaw) return alert("Cole o link primeiro!");
-
-            let finalUrl = urlRaw;
-            let titulo = "Janela " + tipo;
-
-            if(tipo < 3) {
-                const id = getID(urlRaw);
-                if(id) {
-                    finalUrl = `https://www.youtube.com/embed/${id}?autoplay=1`;
-                    titulo = "Live " + tipo;
-                }
-            } else {
-                titulo = "Rastreador Helios";
-                // Truque para o Helios carregar melhor: garantir que o link seja https
-                finalUrl = urlRaw.startsWith("http") ? urlRaw : "https://" + urlRaw;
-            }
-
-            const winId = "win-" + Date.now();
-            const winHtml = `
-                <div id="${winId}" class="window" style="width: 400px; height: 300px; top: 100px; left: ${tipo * 50}px;">
-                    <div class="window-header">
-                        <span>${titulo}</span>
-                        <span class="close-btn" onclick="$('#${winId}').remove()">X</span>
-                    </div>
-                    <div class="window-content">
-                        <iframe src="${finalUrl}"></iframe>
-                    </div>
-                </div>
-            `;
-
-            $("#desktop").append(winHtml);
-            $("#" + winId).draggable({ handle: ".window-header", containment: "#desktop" }).resizable();
+        window.onload = function() {
+            document.getElementById('in1').value = localStorage.getItem('l1') || "";
+            document.getElementById('in2').value = localStorage.getItem('l2') || "";
+            document.getElementById('in3').value = localStorage.getItem('l3') || "";
+            if(localStorage.getItem('l1')) carregar();
         }
     </script>
 </body>
