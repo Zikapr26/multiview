@@ -6,7 +6,6 @@
     <style>
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* Toolbar */
         #toolbar { background: #1a1a1a; padding: 10px; display: flex; gap: 8px; align-items: center; border-bottom: 2px solid #333; z-index: 1000; flex-wrap: wrap; transition: 0.3s; }
         .toolbar-hidden { margin-top: -150px; opacity: 0; pointer-events: none; }
         input { background: #000; border: 1px solid #444; color: #fff; padding: 6px; border-radius: 4px; width: 100px; font-size: 11px; }
@@ -17,7 +16,6 @@
         #show-menu-btn { position: fixed; top: 0; left: 50%; transform: translateX(-50%); background: #333; padding: 3px 15px; border-radius: 0 0 10px 10px; z-index: 1001; cursor: pointer; opacity: 0.3; font-size: 10px; }
         #show-menu-btn:hover { opacity: 1; background: #cc0000; }
 
-        /* Estrutura Principal */
         #main-container { display: flex; flex: 1; width: 100%; overflow: hidden; }
         #content-area { display: flex; flex-direction: column; flex: 1; background: #000; }
         
@@ -25,13 +23,11 @@
         .video-box { position: relative; background: #000; overflow: hidden; display: flex; flex: 1; }
         iframe { width: 100%; height: 100%; border: none; }
 
-        /* Divisores */
         .gutter { background: #333; z-index: 10; }
         .gutter:hover { background: #ff0000; }
         .gutter-h { cursor: col-resize; width: 6px; }
         .gutter-v { cursor: row-resize; height: 6px; width: 100%; }
 
-        /* Chat */
         #chat-area { width: 300px; background: #0f0f0f; display: flex; flex-direction: column; border-left: 2px solid #333; }
         .chat-header { padding: 8px; background: #1a1a1a; text-align: center; font-size: 11px; font-weight: bold; border-bottom: 1px solid #333; }
         .hide { display: none !important; }
@@ -51,7 +47,7 @@
 
         <div class="group">
             <span>LAYOUT:</span>
-            <button onclick="mudarLayout('grade')">GRADE</button>
+            <button onclick="mudarLayout('grade')">4 TELAS</button>
             <button onclick="mudarLayout('lado')">LADO/LADO</button>
             <button onclick="mudarLayout('pilha')">PILHA</button>
         </div>
@@ -125,21 +121,36 @@
 
         function mudarLayout(modo) {
             const b2 = document.getElementById('b2');
+            const b3 = document.getElementById('b3');
+            const b4 = document.getElementById('b4');
             const rowB = document.getElementById('bottom-row');
             const gV = document.getElementById('gV');
             const gH1 = document.getElementById('gH1');
+            const gH2 = document.getElementById('gH2');
+            const topRow = document.getElementById('top-row');
 
-            // Reset
-            b2.classList.remove('hide'); rowB.classList.remove('hide'); gV.classList.remove('hide'); gH1.classList.remove('hide');
-            document.getElementById('top-row').style.height = "50%";
+            // Reset inicial (Mostra tudo)
+            b2.classList.remove('hide'); b3.classList.remove('hide'); b4.classList.remove('hide');
+            rowB.classList.remove('hide'); gV.classList.remove('hide'); 
+            gH1.classList.remove('hide'); gH2.classList.remove('hide');
+            topRow.style.height = "50%";
             document.getElementById('b1').style.flex = "1";
+            document.getElementById('b3').style.flex = "1";
 
             if(modo === 'lado') {
+                // Esconde a linha de baixo e deixa L1 e L2 lado a lado
                 rowB.classList.add('hide'); gV.classList.add('hide');
-                document.getElementById('top-row').style.height = "100%";
+                topRow.style.height = "100%";
             } else if(modo === 'pilha') {
-                b2.classList.add('hide'); gH1.classList.add('hide');
-                document.getElementById('b1').style.flex = "1";
+                // Esconde as colunas da direita e deixa L1 e L2 (embaixo) em pilha
+                b2.classList.add('hide'); b4.classList.add('hide');
+                gH1.classList.add('hide'); gH2.classList.add('hide');
+                
+                // Garante que a L2 apareça no slot inferior (b3)
+                const urlL2 = document.getElementById('v2').src;
+                if(urlL2) document.getElementById('v3').src = urlL2;
+                
+                topRow.style.height = "50%";
                 rowB.style.height = "50%";
             }
         }
