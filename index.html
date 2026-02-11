@@ -9,36 +9,32 @@
         /* Toolbar */
         #toolbar { background: #1a1a1a; padding: 10px; display: flex; gap: 8px; align-items: center; border-bottom: 2px solid #333; z-index: 1000; flex-wrap: wrap; transition: 0.3s; }
         .toolbar-hidden { margin-top: -150px; opacity: 0; pointer-events: none; }
-        input { background: #000; border: 1px solid #444; color: #fff; padding: 6px; border-radius: 4px; width: 110px; font-size: 11px; }
+        input { background: #000; border: 1px solid #444; color: #fff; padding: 6px; border-radius: 4px; width: 100px; font-size: 11px; }
         button { background: #cc0000; color: white; border: none; padding: 7px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; }
         .group { display: flex; align-items: center; gap: 6px; border-left: 1px solid #444; padding-left: 8px; font-size: 11px; }
         input[type="range"] { width: 50px; accent-color: #ff0000; }
 
-        #show-menu-btn { position: fixed; top: 0; left: 50%; transform: translateX(-50%); background: #333; padding: 5px 15px; border-radius: 0 0 10px 10px; z-index: 1001; cursor: pointer; opacity: 0.3; font-size: 10px; }
+        #show-menu-btn { position: fixed; top: 0; left: 50%; transform: translateX(-50%); background: #333; padding: 3px 15px; border-radius: 0 0 10px 10px; z-index: 1001; cursor: pointer; opacity: 0.3; font-size: 10px; }
         #show-menu-btn:hover { opacity: 1; background: #cc0000; }
 
-        /* Estrutura de Conteúdo */
+        /* Estrutura Principal */
         #main-container { display: flex; flex: 1; width: 100%; overflow: hidden; }
-        #content-area { display: flex; flex: 1; background: #000; position: relative; }
+        #content-area { display: flex; flex-direction: column; flex: 1; background: #000; }
         
-        /* Modos de Layout */
-        .h-mode { flex-direction: row !important; }
-        .v-mode { flex-direction: column !important; }
-
-        .video-box { position: relative; background: #000; overflow: hidden; display: flex; }
+        #top-row, #bottom-row { display: flex; width: 100%; }
+        .video-box { position: relative; background: #000; overflow: hidden; display: flex; flex: 1; }
         iframe { width: 100%; height: 100%; border: none; }
 
-        /* Divisores Arrastáveis */
-        .gutter { background: #333; z-index: 10; transition: background 0.2s; }
+        /* Divisores */
+        .gutter { background: #333; z-index: 10; }
         .gutter:hover { background: #ff0000; }
-        .gutter-h { cursor: col-resize; width: 6px; height: 100%; }
+        .gutter-h { cursor: col-resize; width: 6px; }
         .gutter-v { cursor: row-resize; height: 6px; width: 100%; }
 
         /* Chat */
         #chat-area { width: 300px; background: #0f0f0f; display: flex; flex-direction: column; border-left: 2px solid #333; }
         .chat-header { padding: 8px; background: #1a1a1a; text-align: center; font-size: 11px; font-weight: bold; border-bottom: 1px solid #333; }
         .hide { display: none !important; }
-        .active-btn { background: #065fd4 !important; }
     </style>
 </head>
 <body>
@@ -48,35 +44,50 @@
     <div id="toolbar">
         <input type="text" id="in1" placeholder="L1">
         <input type="text" id="in2" placeholder="L2">
+        <input type="text" id="in3" placeholder="L3">
+        <input type="text" id="in4" placeholder="L4">
         <button onclick="carregar()">CARREGAR</button>
         <button onclick="salvar()" style="background:#28a745">SALVAR</button>
 
         <div class="group">
-            <button onclick="setLayout('h')">HORIZ</button>
-            <button onclick="setLayout('v')">PILHA</button>
+            <span>LAYOUT:</span>
+            <button onclick="mudarLayout('grade')">GRADE</button>
+            <button onclick="mudarLayout('lado')">LADO/LADO</button>
+            <button onclick="mudarLayout('pilha')">PILHA</button>
         </div>
 
         <div class="group">
             <span>Ajuste:</span>
-            <input type="range" min="10" max="90" value="50" id="mainRange" oninput="manualResize(this.value)">
-            <span>Chat:</span>
-            <input type="range" min="150" max="600" value="300" oninput="ajustarChat(this.value)">
+            <input type="range" min="10" max="90" value="50" id="rangeW" oninput="ajustarLargura(this.value)">
+            <input type="range" min="10" max="90" value="50" id="rangeH" oninput="ajustarAltura(this.value)">
         </div>
 
         <div class="group">
-            <button onclick="swapChat(1)" id="c1">CHAT L1</button>
-            <button onclick="swapChat(2)" id="c2">CHAT L2</button>
+            <span>Chat:</span>
+            <button onclick="swapChat(1)">L1</button>
+            <button onclick="swapChat(2)">L2</button>
             <button onclick="toggleChat()" style="background:#444">CHAT</button>
             <button onclick="toggleMenu()" style="background:#444">MENU</button>
         </div>
     </div>
 
     <div id="main-container">
-        <div id="content-area" class="h-mode">
-            <div id="box1" class="video-box" style="width: 50%; height: 100%;"><iframe id="v1"></iframe></div>
-            <div id="dividor" class="gutter gutter-h" onmousedown="initResize(event)"></div>
-            <div id="box2" class="video-box" style="flex: 1; height: 100%;"><iframe id="v2"></iframe></div>
+        <div id="content-area">
+            <div id="top-row" style="height: 50%;">
+                <div id="b1" class="video-box"><iframe id="v1"></iframe></div>
+                <div id="gH1" class="gutter gutter-h" onmousedown="initResizeH(event)"></div>
+                <div id="b2" class="video-box"><iframe id="v2"></iframe></div>
+            </div>
+            
+            <div id="gV" class="gutter gutter-v" onmousedown="initResizeV(event)"></div>
+            
+            <div id="bottom-row" style="height: 50%;">
+                <div id="b3" class="video-box"><iframe id="v3"></iframe></div>
+                <div id="gH2" class="gutter gutter-h" onmousedown="initResizeH(event)"></div>
+                <div id="b4" class="video-box"><iframe id="v4"></iframe></div>
+            </div>
         </div>
+
         <div id="chat-area">
             <div class="chat-header" id="chat-title">CHAT: LIVE 1</div>
             <iframe id="chat-frame"></iframe>
@@ -84,18 +95,17 @@
     </div>
 
     <script>
-        let ids = ["", ""];
-        let currentLayout = 'h';
+        let ids = ["", "", "", ""];
 
         window.onload = function() {
-            document.getElementById('in1').value = localStorage.getItem('l1') || "";
-            document.getElementById('in2').value = localStorage.getItem('l2') || "";
+            for(let i=1; i<=4; i++) {
+                document.getElementById('in'+i).value = localStorage.getItem('l'+i) || "";
+            }
             if(localStorage.getItem('l1')) carregar();
         };
 
         function salvar() {
-            localStorage.setItem('l1', document.getElementById('in1').value);
-            localStorage.setItem('l2', document.getElementById('in2').value);
+            for(let i=1; i<=4; i++) localStorage.setItem('l'+i, document.getElementById('in'+i).value);
             alert("Links salvos!");
         }
 
@@ -106,69 +116,50 @@
         }
 
         function carregar() {
-            for(let i=1; i<=2; i++) {
+            for(let i=1; i<=4; i++) {
                 ids[i-1] = getID(document.getElementById('in'+i).value);
                 if(ids[i-1]) document.getElementById('v'+i).src = `https://www.youtube.com/embed/${ids[i-1]}?autoplay=1`;
             }
             swapChat(1);
         }
 
-        function setLayout(mode) {
-            currentLayout = mode;
-            const area = document.getElementById('content-area');
-            const div = document.getElementById('dividor');
-            const b1 = document.getElementById('box1');
-            
-            if(mode === 'h') {
-                area.className = "h-mode";
-                div.className = "gutter gutter-h";
-                b1.style.width = "50%"; b1.style.height = "100%";
-            } else {
-                area.className = "v-mode";
-                div.className = "gutter gutter-v";
-                b1.style.width = "100%"; b1.style.height = "50%";
+        function mudarLayout(modo) {
+            const b2 = document.getElementById('b2');
+            const rowB = document.getElementById('bottom-row');
+            const gV = document.getElementById('gV');
+            const gH1 = document.getElementById('gH1');
+
+            // Reset
+            b2.classList.remove('hide'); rowB.classList.remove('hide'); gV.classList.remove('hide'); gH1.classList.remove('hide');
+            document.getElementById('top-row').style.height = "50%";
+            document.getElementById('b1').style.flex = "1";
+
+            if(modo === 'lado') {
+                rowB.classList.add('hide'); gV.classList.add('hide');
+                document.getElementById('top-row').style.height = "100%";
+            } else if(modo === 'pilha') {
+                b2.classList.add('hide'); gH1.classList.add('hide');
+                document.getElementById('b1').style.flex = "1";
+                rowB.style.height = "50%";
             }
         }
 
-        function manualResize(val) {
-            const b1 = document.getElementById('box1');
-            if(currentLayout === 'h') {
-                b1.style.width = val + "%"; b1.style.height = "100%";
-            } else {
-                b1.style.height = val + "%"; b1.style.width = "100%";
-            }
-        }
-
-        function initResize(e) {
-            window.addEventListener('mousemove', resizing);
-            window.addEventListener('mouseup', stopResize);
-        }
-
-        function resizing(e) {
-            let val;
-            if(currentLayout === 'h') {
-                val = (e.clientX / window.innerWidth) * 100;
-            } else {
-                val = (e.clientY / window.innerHeight) * 100;
-            }
-            manualResize(val);
-            document.getElementById('mainRange').value = val;
-        }
-
-        function stopResize() {
-            window.removeEventListener('mousemove', resizing);
-        }
-
-        function ajustarChat(val) { document.getElementById('chat-area').style.width = val + "px"; }
-        function swapChat(n) {
-            const tid = ids[n-1];
-            const domain = window.location.hostname;
-            document.getElementById('chat-title').innerText = "CHAT: LIVE " + n;
-            if(tid) document.getElementById('chat-frame').src = `https://www.youtube.com/live_chat?v=${tid}&embed_domain=${domain}`;
-        }
+        function ajustarLargura(val) { document.getElementById('b1').style.flex = `0 0 ${val}%`; document.getElementById('b3').style.flex = `0 0 ${val}%`; }
+        function ajustarAltura(val) { document.getElementById('top-row').style.height = val + "%"; document.getElementById('bottom-row').style.height = (100-val) + "%"; }
+        
+        function initResizeH(e) { window.addEventListener('mousemove', resizeH); window.addEventListener('mouseup', stopResize); }
+        function resizeH(e) { let v = (e.clientX / window.innerWidth) * 100; ajustarLargura(v); }
+        function initResizeV(e) { window.addEventListener('mousemove', resizeV); window.addEventListener('mouseup', stopResize); }
+        function resizeV(e) { let v = (e.clientY / window.innerHeight) * 100; ajustarAltura(v); }
+        function stopResize() { window.removeEventListener('mousemove', resizeH); window.removeEventListener('mousemove', resizeV); }
 
         function toggleMenu() { document.getElementById('toolbar').classList.toggle('toolbar-hidden'); }
         function toggleChat() { document.getElementById('chat-area').classList.toggle('hide'); }
+        function swapChat(n) {
+            const tid = ids[n-1];
+            if(tid) document.getElementById('chat-frame').src = `https://www.youtube.com/live_chat?v=${tid}&embed_domain=${window.location.hostname}`;
+            document.getElementById('chat-title').innerText = "CHAT: LIVE " + n;
+        }
     </script>
 </body>
 </html>
