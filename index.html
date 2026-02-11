@@ -2,92 +2,152 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>MultiView Pro - Óptica Pupilent Edition</title>
+    <title>MultiView Pro - zikapr26</title>
     <style>
-        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0a0a0a; color: #eee; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        #toolbar { background: #1a1a1a; padding: 10px; display: flex; gap: 10px; align-items: center; border-bottom: 2px solid #333; z-index: 100; flex-wrap: wrap; }
+        input { background: #000; border: 1px solid #444; color: #fff; padding: 6px; border-radius: 4px; width: 180px; font-size: 11px; }
+        button { background: #cc0000; color: white; border: none; padding: 7px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; }
+        button:hover { background: #ff0000; }
+        .group { display: flex; align-items: center; gap: 8px; border-left: 1px solid #444; padding-left: 10px; }
         
-        /* Barra de Topo */
-        #header { background: #1a1a1a; padding: 12px 20px; display: flex; gap: 15px; align-items: center; border-bottom: 2px solid #333; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
-        input { background: #000; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 5px; width: 280px; outline: none; transition: 0.3s; }
-        input:focus { border-color: #ff0000; }
-        button { background: #ff0000; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: 0.2s; }
-        button:hover { background: #b30000; transform: scale(1.05); }
-        .chat-selector { border-left: 1px solid #444; padding-left: 15px; display: flex; align-items: center; gap: 8px; }
-        .btn-chat { background: #333; font-size: 11px; padding: 8px 12px; }
-        .btn-chat.active { background: #065fd4; }
-
-        /* Área de Conteúdo */
-        #workspace { display: flex; flex: 1; width: 100%; height: calc(100vh - 65px); }
+        #main { display: flex; flex: 1; overflow: hidden; width: 100%; }
+        #content-area { display: flex; flex: 1; background: #000; position: relative; }
         
-        /* Coluna dos Vídeos */
-        #video-stack { display: flex; flex-direction: column; flex: 1; background: #000; }
-        .video-slot { flex: 1; position: relative; border-bottom: 1px solid #222; }
-        iframe { width: 100%; height: 100%; border: none; }
+        .layout-vertical { flex-direction: column; }
+        .layout-horizontal { flex-direction: row; }
 
-        /* Coluna do Chat */
-        #chat-sidebar { width: 380px; background: #0f0f0f; border-left: 2px solid #333; display: flex; flex-direction: column; }
-        #chat-label { padding: 12px; background: #1a1a1a; font-size: 13px; font-weight: bold; border-bottom: 1px solid #333; text-align: center; color: #aaa; }
+        .box { position: relative; overflow: hidden; background: #000; display: flex; }
+        iframe { width: 100%; height: 100%; border: none; flex: 1; }
+
+        #chat-area { width: 350px; background: #0f0f0f; display: flex; flex-direction: column; border-left: 2px solid #333; }
+        .chat-header { padding: 8px; background: #1a1a1a; text-align: center; font-size: 11px; font-weight: bold; border-bottom: 1px solid #333; }
+        .hide { display: none !important; }
+        .active-btn { background: #065fd4 !important; }
     </style>
 </head>
 <body>
 
-    <div id="header">
-        <input type="text" id="linkA" placeholder="Cole o Link 1 aqui...">
-        <input type="text" id="linkB" placeholder="Cole o Link 2 aqui...">
-        <button onclick="iniciar()">CARREGAR TUDO</button>
+    <div id="toolbar">
+        <input type="text" id="in1" placeholder="Live do YouTube">
+        <input type="text" id="in2" placeholder="Site Helios ou Mapa">
+        <button onclick="carregar()">CARREGAR</button>
+        <button onclick="salvar()" style="background:#28a745">SALVAR LINKS</button>
 
-        <div class="chat-selector">
-            <span style="font-size: 11px; color: #888;">CHAT:</span>
-            <button id="cBtn1" class="btn-chat active" onclick="trocarChat(1)">LIVE 1</button>
-            <button id="cBtn2" class="btn-chat" onclick="trocarChat(2)">LIVE 2</button>
+        <div class="group">
+            <button onclick="mudarLayout('horizontal')" id="btnHoriz">LADO A LADO</button>
+            <button onclick="mudarLayout('vertical')" id="btnVert" class="active-btn">PILHA</button>
+        </div>
+
+        <div class="group">
+            <span>Ajuste:</span>
+            <input type="range" min="10" max="90" value="50" oninput="redimensionar(this.value)">
+        </div>
+
+        <div class="group">
+            <span>Chat:</span>
+            <button id="bc1" onclick="swapChat(1)" class="active-btn">L1</button>
+            <button id="bc2" onclick="swapChat(2)">L2</button>
+            <button onclick="toggleChat()" id="btnChatToggle" class="active-btn">EXIBIR</button>
         </div>
     </div>
 
-    <div id="workspace">
-        <div id="video-stack">
-            <div class="video-slot"><iframe id="playerA"></iframe></div>
-            <div class="video-slot"><iframe id="playerB"></iframe></div>
+    <div id="main">
+        <div id="content-area" class="layout-vertical">
+            <div id="box1" class="box" style="height: 50%; width: 100%;"><iframe id="v1"></iframe></div>
+            <div id="box2" class="box" style="height: 50%; width: 100%;"><iframe id="v2"></iframe></div>
         </div>
-        <div id="chat-sidebar">
-            <div id="chat-label">SELECIONE UMA LIVE</div>
-            <iframe id="main-chat"></iframe>
+        <div id="chat-area">
+            <div class="chat-header" id="chat-title">CHAT: LIVE 1</div>
+            <iframe id="chat-frame" src=""></iframe>
         </div>
     </div>
 
     <script>
-        let idA = "";
-        let idB = "";
+        let id1 = "", id2 = "", currentLayout = 'vertical';
 
-        function extrairID(url) {
-            const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-            const match = url.match(regex);
-            return (match && match[1]) ? match[1] : null;
+        // Carrega links salvos ao abrir a página
+        window.onload = function() {
+            const s1 = localStorage.getItem('link1');
+            const s2 = localStorage.getItem('link2');
+            if(s1) document.getElementById('in1').value = s1;
+            if(s2) document.getElementById('in2').value = s2;
+            if(s1 || s2) carregar();
+        };
+
+        function salvar() {
+            localStorage.setItem('link1', document.getElementById('in1').value);
+            localStorage.setItem('link2', document.getElementById('in2').value);
+            alert("Links salvos com sucesso!");
         }
 
-        function iniciar() {
-            idA = extrairID(document.getElementById('linkA').value);
-            idB = extrairID(document.getElementById('linkB').value);
-
-            if (idA) document.getElementById('playerA').src = `https://www.youtube.com/embed/${idA}?autoplay=1&mute=0&rel=0`;
-            if (idB) document.getElementById('playerB').src = `https://www.youtube.com/embed/${idB}?autoplay=1&mute=1&rel=0`;
-            
-            trocarChat(1);
+        function getID(url) {
+            const reg = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+            const m = url.match(reg);
+            return (m && m[1]) ? m[1] : null;
         }
 
-        function trocarChat(num) {
-            const chatFrame = document.getElementById('main-chat');
-            const label = document.getElementById('chat-label');
-            const targetID = (num === 1) ? idA : idB;
+        function carregar() {
+            const val1 = document.getElementById('in1').value;
+            const val2 = document.getElementById('in2').value;
             
-            // Ajuste para rodar localmente ou no servidor
-            const domain = window.location.hostname || "localhost";
+            id1 = getID(val1);
+            if(id1) document.getElementById('v1').src = `https://www.youtube.com/embed/${id1}?autoplay=1`;
 
-            document.getElementById('cBtn1').classList.toggle('active', num === 1);
-            document.getElementById('cBtn2').classList.toggle('active', num === 2);
+            id2 = getID(val2);
+            if(id2) {
+                document.getElementById('v2').src = `https://www.youtube.com/embed/${id2}?autoplay=1`;
+            } else if(val2.includes("http")) {
+                document.getElementById('v2').src = val2;
+            }
+            swapChat(1);
+        }
 
-            if (targetID) {
-                chatFrame.src = `https://www.youtube.com/live_chat?v=${targetID}&embed_domain=${domain}`;
-                label.innerText = `EXIBINDO CHAT DA LIVE ${num}`;
+        function mudarLayout(tipo) {
+            const area = document.getElementById('content-area');
+            const b1 = document.getElementById('box1');
+            const b2 = document.getElementById('box2');
+            currentLayout = tipo;
+            area.className = tipo === 'vertical' ? 'layout-vertical' : 'layout-horizontal';
+            document.getElementById('btnVert').classList.toggle('active-btn', tipo === 'vertical');
+            document.getElementById('btnHoriz').classList.toggle('active-btn', tipo === 'horizontal');
+            b1.style.width = tipo === 'vertical' ? "100%" : "50%";
+            b1.style.height = tipo === 'vertical' ? "50%" : "100%";
+            b2.style.width = tipo === 'vertical' ? "100%" : "50%";
+            b2.style.height = tipo === 'vertical' ? "50%" : "100%";
+        }
+
+        function redimensionar(val) {
+            const b1 = document.getElementById('box1');
+            const b2 = document.getElementById('box2');
+            if(currentLayout === 'vertical') {
+                b1.style.height = val + "%";
+                b2.style.height = (100 - val) + "%";
+            } else {
+                b1.style.width = val + "%";
+                b2.style.width = (100 - val) + "%";
+            }
+        }
+
+        function toggleChat() {
+            const chat = document.getElementById('chat-area');
+            const btn = document.getElementById('btnChatToggle');
+            chat.classList.toggle('hide');
+            btn.classList.toggle('active-btn');
+            btn.innerText = chat.classList.contains('hide') ? "MOSTRAR" : "OCULTAR";
+        }
+
+        function swapChat(n) {
+            const tid = (n === 1) ? id1 : id2;
+            const domain = window.location.hostname;
+            document.getElementById('bc1').classList.toggle('active-btn', n === 1);
+            document.getElementById('bc2').classList.toggle('active-btn', n === 2);
+            document.getElementById('chat-title').innerText = "CHAT: LIVE " + n;
+            if(tid) {
+                document.getElementById('chat-frame').src = `https://www.youtube.com/live_chat?v=${tid}&embed_domain=${domain}`;
+            } else {
+                document.getElementById('chat-frame').src = "";
+                document.getElementById('chat-title').innerText = "CHAT INDISPONÍVEL";
             }
         }
     </script>
