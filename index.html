@@ -116,31 +116,28 @@
 
         function carregar() {
             for(let i=1; i<=4; i++) {
-                ids[i-1] = getID(document.getElementById('in'+i).value);
-                document.getElementById('v'+i).src = ids[i-1] ? `https://www.youtube.com/embed/${ids[i-1]}?autoplay=1&rel=0` : "";
+                const val = document.getElementById('in'+i).value;
+                ids[i-1] = getID(val);
+                if(ids[i-1]) document.getElementById('v'+i).src = `https://www.youtube.com/embed/${ids[i-1]}?autoplay=1&rel=0`;
             }
         }
 
         function mudarLayout(modo) {
-            const b1=document.getElementById('b1'), b2=document.getElementById('b2'), b3=document.getElementById('b3'), b4=document.getElementById('b4'), rowB=document.getElementById('bottom-row'), gV=document.getElementById('gV'), gH1=document.getElementById('gH1'), gH2=document.getElementById('gH2'), topR=document.getElementById('top-row'), contentArea=document.getElementById('content-area');
+            const b1=document.getElementById('b1'), b2=document.getElementById('b2'), b3=document.getElementById('b3'), b4=document.getElementById('b4'), rowB=document.getElementById('bottom-row'), gV=document.getElementById('gV'), gH1=document.getElementById('gH1'), gH2=document.getElementById('gH2'), topR=document.getElementById('top-row');
             
-            // RESET
+            // RESET GERAL
             [b1, b2, b3, b4, rowB, gV, gH1, gH2].forEach(el => el.classList.remove('hide'));
-            contentArea.style.flexDirection = "column";
-            topR.style.flexDirection = "row";
-            topR.style.height = "50%";
-            rowB.style.height = "50%";
-            b1.style.flex = "1"; b2.style.flex = "1"; b3.style.flex = "1"; b4.style.flex = "1";
+            topR.style.display = "flex"; topR.style.flexDirection = "row"; topR.style.height = "50%";
+            rowB.style.display = "flex"; rowB.style.height = "50%";
+            b1.style.flex = "1"; b2.style.flex = "1";
 
             if(modo === 'lado') {
                 rowB.classList.add('hide'); gV.classList.add('hide'); topR.style.height = "100%";
             } else if(modo === 'pilha') {
-                // Vertical real com L1 e L2 sem trocar links
-                b2.classList.add('hide'); b4.classList.add('hide'); gH1.classList.add('hide'); gH2.classList.add('hide'); rowB.classList.add('hide'); gV.classList.add('hide');
+                // Modo V: Live 1 em cima, Live 2 embaixo. Esconde o resto e empilha a linha do topo.
+                rowB.classList.add('hide'); gV.classList.add('hide'); gH1.classList.add('hide');
                 topR.style.flexDirection = "column"; topR.style.height = "100%";
             }
-            // Recarrega as lives conforme os campos para limpar duplicações
-            carregar();
         }
 
         function swapChat(n) {
