@@ -5,60 +5,44 @@
     <title>MultiWatch</title>
     <style>
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #000; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        
-        #toolbar { background: #111; padding: 8px 15px; display: flex; gap: 10px; align-items: center; border-bottom: 1px solid #222; z-index: 1000; flex-wrap: wrap; }
+        #toolbar { background: #111; padding: 8px 15px; display: flex; gap: 10px; align-items: center; border-bottom: 1px solid #333; z-index: 1000; flex-wrap: wrap; }
         .input-wrapper { position: relative; display: flex; align-items: center; }
         input { background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 6px 25px 6px 10px; border-radius: 4px; width: 100px; font-size: 12px; outline: none; }
         .clear-btn { position: absolute; right: 5px; cursor: pointer; color: #555; font-size: 14px; font-weight: bold; border: none; background: none; }
-        .clear-btn:hover { color: #ff0000; }
-        
         button { background: #222; color: #eee; border: 1px solid #333; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; }
         button:hover { background: #333; }
         .btn-primary { background: #ff0000; border: none; color: white; }
         .active-chat { border-color: #ff0000 !important; color: #ff0000 !important; }
         .group { display: flex; align-items: center; gap: 8px; border-left: 1px solid #222; padding-left: 12px; height: 24px; color: #666; font-size: 11px; }
-
         #main-container { display: flex; flex: 1; width: 100%; overflow: hidden; background: #000; }
         #content-area { display: flex; flex-direction: column; flex: 1; }
-        
         .video-box { position: relative; background: #000; overflow: hidden; display: flex; flex: 1; }
         iframe { width: 100%; height: 100%; border: none; background: #000; }
-
         .gutter { background: #000; z-index: 10; transition: background 0.2s; }
         .gutter:hover { background: #ff0000 !important; }
         .gutter-h { cursor: col-resize; width: 4px; }
         .gutter-v { cursor: row-resize; height: 4px; width: 100%; }
-
         #chat-area { width: 320px; background: #000; display: flex; flex-direction: column; border-left: 1px solid #222; }
         .hide { display: none !important; }
         #menu-trigger { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 120px; height: 8px; z-index: 1001; cursor: pointer; }
     </style>
 </head>
 <body>
-
     <div id="menu-trigger" onclick="toggleMenu()"></div>
-
     <div id="toolbar">
         <div class="input-wrapper"><input type="text" id="in1" placeholder="L1"><button class="clear-btn" onclick="apagarSlot(1)">×</button></div>
         <div class="input-wrapper"><input type="text" id="in2" placeholder="L2"><button class="clear-btn" onclick="apagarSlot(2)">×</button></div>
         <div class="input-wrapper"><input type="text" id="in3" placeholder="L3"><button class="clear-btn" onclick="apagarSlot(3)">×</button></div>
         <div class="input-wrapper"><input type="text" id="in4" placeholder="L4"><button class="clear-btn" onclick="apagarSlot(4)">×</button></div>
-        
         <button class="btn-primary" onclick="carregar()">CARREGAR</button>
         <button onclick="salvar()">SALVAR</button>
         <button onclick="limparTudo()" style="color: #ff5555;">LIMPAR</button>
-
         <div class="group">
             <button onclick="mudarLayout('grade')">4T</button>
             <button onclick="mudarLayout('lado')">H</button>
             <button onclick="mudarLayout('pilha')">V</button>
         </div>
-
-        <div class="group">
-            <button onclick="toggleChat()">CHAT</button>
-            <button onclick="toggleMenu()">MENU</button>
-        </div>
-
+        <div class="group"><button onclick="toggleChat()">CHAT</button><button onclick="toggleMenu()">MENU</button></div>
         <div class="group">
             <span>CHATS:</span>
             <button onclick="swapChat(1)" id="c1">1</button>
@@ -67,7 +51,6 @@
             <button onclick="swapChat(4)" id="c4">4</button>
         </div>
     </div>
-
     <div id="main-container">
         <div id="content-area">
             <div id="top-row" style="height: 50%; display: flex;">
@@ -82,76 +65,54 @@
                 <div id="b4" class="video-box"><iframe id="v4"></iframe></div>
             </div>
         </div>
-        <div id="chat-area" class="hide">
-            <iframe id="chat-frame" style="flex: 1; height: 100%;"></iframe>
-        </div>
+        <div id="chat-area" class="hide"><iframe id="chat-frame" style="flex: 1; height: 100%;"></iframe></div>
     </div>
-
     <script>
         let ids = ["", "", "", ""];
         const domain = window.location.hostname;
-
         window.onload = function() {
             for(let i=1; i<=4; i++) document.getElementById('in'+i).value = localStorage.getItem('l'+i) || "";
             carregar();
         };
-
         function getID(url) {
             const reg = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
             const m = url.match(reg);
             return (m && m[1]) ? m[1] : null;
         }
-
         function apagarSlot(n) {
             document.getElementById('in' + n).value = "";
             document.getElementById('v' + n).src = "";
             localStorage.removeItem('l' + n);
             ids[n-1] = "";
         }
-
         function limparTudo() { if(confirm("Limpar tudo?")) for(let i=1; i<=4; i++) apagarSlot(i); }
         function salvar() { for(let i=1; i<=4; i++) localStorage.setItem('l'+i, document.getElementById('in'+i).value); alert("Salvo!"); }
-
         function carregar() {
             for(let i=1; i<=4; i++) {
                 ids[i-1] = getID(document.getElementById('in'+i).value);
                 document.getElementById('v'+i).src = ids[i-1] ? `https://www.youtube.com/embed/${ids[i-1]}?autoplay=1&rel=0` : "";
             }
         }
-
         function mudarLayout(modo) {
             const b1=document.getElementById('b1'), b2=document.getElementById('b2'), b3=document.getElementById('b3'), b4=document.getElementById('b4'), rowB=document.getElementById('bottom-row'), gV=document.getElementById('gV'), gH1=document.getElementById('gH1'), gH2=document.getElementById('gH2'), topR=document.getElementById('top-row'), contentArea=document.getElementById('content-area');
-            
-            // Reset de visibilidade e ordem
             [b1, b2, b3, b4, rowB, gV, gH1, gH2].forEach(el => el.classList.remove('hide'));
-            topR.style.flexDirection = "row";
-            rowB.style.flexDirection = "row";
-            contentArea.style.flexDirection = "column";
-            topR.style.height = "50%";
-            b1.style.flex = "1"; b2.style.flex = "1"; b3.style.flex = "1"; b4.style.flex = "1";
-
+            topR.style.flexDirection = "row"; rowB.style.flexDirection = "row"; contentArea.style.flexDirection = "column"; topR.style.height = "50%"; rowB.style.height = "50%"; b1.style.flex = "1"; b2.style.flex = "1"; b3.style.flex = "1"; b4.style.flex = "1";
             if(modo === 'lado') {
                 rowB.classList.add('hide'); gV.classList.add('hide'); topR.style.height = "100%";
             } else if(modo === 'pilha') {
-                // Modo Vertical Real (L1 em cima, L2 embaixo)
-                b3.classList.add('hide'); b4.classList.add('hide'); // Esconde a linha de baixo original
-                gH1.classList.add('hide'); // Esconde o divisor horizontal de cima
-                topR.style.flexDirection = "column"; // Faz a linha de cima empilhar os vídeos
-                topR.style.height = "100%"; // Ocupa a tela toda
+                b3.classList.add('hide'); b4.classList.add('hide'); gH1.classList.add('hide'); gV.classList.add('hide');
+                topR.style.flexDirection = "column"; topR.style.height = "100%";
             }
         }
-
         function swapChat(n) {
             const videoId = ids[n-1];
             document.querySelectorAll('.group button').forEach(b => b.classList.remove('active-chat'));
             if(videoId) {
                 document.getElementById('chat-frame').style.background = "#000";
-                // Forçamos o parâmetro dark para evitar o fundo branco
                 document.getElementById('chat-frame').src = `https://www.youtube.com/live_chat?v=${videoId}&embed_domain=${domain}&dark_theme=1`;
                 document.getElementById('c' + n).classList.add('active-chat');
             }
         }
-
         function initResizeH(e) { window.addEventListener('mousemove', resH); window.addEventListener('mouseup', stp); }
         function resH(e) { let chatW = document.getElementById('chat-area').classList.contains('hide') ? 0 : 320; let v = (e.clientX / (window.innerWidth - chatW)) * 100; document.getElementById('b1').style.flex = `0 0 ${v}%`; document.getElementById('b3').style.flex = `0 0 ${v}%`; }
         function initResizeV(e) { window.addEventListener('mousemove', resV); window.addEventListener('mouseup', stp); }
