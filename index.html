@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>MultiWatch</title>
+    <title>MultiWatch - Zika Edition</title>
     <style>
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #000; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
@@ -10,7 +10,7 @@
         .toolbar-hidden { transform: translateY(-100%); position: absolute; width: 100%; }
         
         .input-wrapper { position: relative; display: flex; align-items: center; }
-        input { background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 6px 25px 6px 10px; border-radius: 4px; width: 100px; font-size: 11px; outline: none; }
+        input { background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 6px 20px 6px 10px; border-radius: 4px; width: 100px; font-size: 11px; outline: none; }
         .clear-btn { position: absolute; right: 5px; cursor: pointer; color: #555; font-size: 14px; font-weight: bold; border: none; background: none; }
         
         button { background: #222; color: #eee; border: 1px solid #333; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; }
@@ -23,7 +23,6 @@
         #main-container { display: flex; flex: 1; width: 100%; overflow: hidden; background: #000; }
         #content-area { display: flex; flex-direction: column; flex: 1; position: relative; }
         
-        /* O PULO DO GATO PARA A QUINA: removemos espaços fantasmas */
         .video-box { position: relative; background: #000; overflow: hidden; display: flex; flex: 1; }
         iframe { width: 100%; height: 100%; border: none; background: #000; display: block; }
 
@@ -35,8 +34,6 @@
         #chat-area { width: 320px; background: #000; display: flex; flex-direction: column; border-left: 1px solid #222; }
         .hide { display: none !important; }
         #menu-trigger { position: fixed; top: 0; left: 0; width: 100%; height: 8px; z-index: 1001; cursor: pointer; }
-        
-        /* Impede que o mouse 'vaze' pro vídeo no meio do ajuste */
         .resizing iframe { pointer-events: none; }
     </style>
 </head>
@@ -71,6 +68,7 @@
             <button onclick="swapChat(2)" id="c2">2</button>
             <button onclick="swapChat(3)" id="c3">3</button>
             <button onclick="swapChat(4)" id="c4">4</button>
+            <button onclick="desmutarFoco()" style="margin-left:5px; background:#444;">🔊</button>
         </div>
     </div>
 
@@ -95,12 +93,22 @@
 
     <script>
         let ids = ["", "", "", ""];
+        let chatAtivo = null;
         const domain = window.location.hostname || "localhost";
 
         window.onload = function() {
+            // Carrega links
             for(let i=1; i<=4; i++) {
                 const val = localStorage.getItem('l'+i);
                 if(val) document.getElementById('in'+i).value = val;
+            }
+            // Carrega ajustes de quina
+            const h = localStorage.getItem('multiwatch-h');
+            const w = localStorage.getItem('multiwatch-w');
+            if(h) document.getElementById('top-row').style.height = h;
+            if(w) {
+                document.getElementById('b1').style.flex = `0 0 ${w}`;
+                document.getElementById('b3').style.flex = `0 0 ${w}`;
             }
             carregar();
         };
@@ -119,34 +127,50 @@
         }
 
         function limparTudo() { if(confirm("Limpar tudo?")) for(let i=1; i<=4; i++) apagarSlot(i); }
-        function salvar() { for(let i=1; i<=4; i++) localStorage.setItem('l'+i, document.getElementById('in'+i).value); alert("Salvo!"); }
+
+        function salvar() { 
+            for(let i=1; i<=4; i++) localStorage.setItem('l'+i, document.getElementById('in'+i).value); 
+            localStorage.setItem('multiwatch-h', document.getElementById('top-row').style.height);
+            localStorage.setItem('multiwatch-w', document.getElementById('b1').style.flex.split(' ').pop());
+            alert("Links e Posições Salvos!"); 
+        }
 
         function carregar() {
             for(let i=1; i<=4; i++) {
                 const val = document.getElementById('in'+i).value;
-                ids[i-1] = getID(val);
-                if(ids[i-1]) document.getElementById('v'+i).src = `https://www.youtube.com/embed/${ids[i-1]}?autoplay=1&mute=1&rel=0`;
+                const newID = getID(val);
+                if(newID) {
+                    if(ids[i-1] !== newID) {
+                        ids[i-1] = newID;
+                        document.getElementById('v'+i).src = `https://www.youtube.com/embed/${newID}?autoplay=1&mute=1&rel=0`;
+                    }
+                } else {
+                    document.getElementById('v'+i).src = "";
+                    ids[i-1] = "";
+                }
             }
         }
 
         function mudarLayout(modo) {
-            const b1=document.getElementById('b1'), b2=document.getElementById('b2'), b3=document.getElementById('b3'), b4=document.getElementById('b4'), rowB=document.getElementById('bottom-row'), gV=document.getElementById('gV'), gH1=document.getElementById('gH1'), gH2=document.getElementById('gH2'), topR=document.getElementById('top-row');
+            const elements = ['b1', 'b2', 'b3', 'b4', 'bottom-row', 'gV', 'gH1', 'gH2'];
+            elements.forEach(id => document.getElementById(id).classList.remove('hide'));
+            const topR = document.getElementById('top-row'), rowB = document.getElementById('bottom-row');
             
-            [b1, b2, b3, b4, rowB, gV, gH1, gH2].forEach(el => el.classList.remove('hide'));
-            topR.style.display = "flex"; topR.style.flexDirection = "row"; topR.style.height = "50%";
-            rowB.style.display = "flex"; rowB.style.height = "50%";
-            b1.style.flex = "1"; b2.style.flex = "1";
+            topR.style.display = "flex"; topR.style.flexDirection = "row";
+            rowB.style.display = "flex";
 
             if(modo === 'lado') {
-                rowB.classList.add('hide'); gV.classList.add('hide'); topR.style.height = "100%";
+                ['b3', 'b4', 'bottom-row', 'gV'].forEach(id => document.getElementById(id).classList.add('hide'));
+                topR.style.height = "100%";
             } else if(modo === 'pilha') {
-                rowB.classList.add('hide'); gV.classList.add('hide'); gH1.classList.add('hide');
+                ['b2', 'b4', 'gV', 'gH1', 'gH2', 'bottom-row'].forEach(id => document.getElementById(id).classList.add('hide'));
                 topR.style.flexDirection = "column"; topR.style.height = "100%";
             }
         }
 
         function swapChat(n) {
             const videoId = ids[n-1];
+            chatAtivo = n;
             document.querySelectorAll('.group button').forEach(b => b.classList.remove('active-chat'));
             if(videoId) {
                 document.getElementById('chat-frame').src = `https://www.youtube.com/live_chat?v=${videoId}&embed_domain=${domain}`;
@@ -155,7 +179,12 @@
             }
         }
 
-        // Resize sem bugs
+        function desmutarFoco() {
+            if(!chatAtivo) return alert("Selecione um chat primeiro!");
+            const id = ids[chatAtivo-1];
+            if(id) document.getElementById('v'+chatAtivo).src = `https://www.youtube.com/embed/${id}?autoplay=1&mute=0&rel=0`;
+        }
+
         function initResizeH(e) { document.body.classList.add('resizing'); window.addEventListener('mousemove', resH); window.addEventListener('mouseup', stp); }
         function resH(e) { 
             let chatW = document.getElementById('chat-area').classList.contains('hide') ? 0 : 320; 
@@ -170,11 +199,23 @@
             document.getElementById('top-row').style.height = v + "%"; 
         }
 
-        function stp() { 
-            document.body.classList.remove('resizing');
-            window.removeEventListener('mousemove', resH); 
-            window.removeEventListener('mousemove', resV); 
-        }
+        function stp() { document.body.classList.remove('resizing'); window.removeEventListener('mousemove', resH); window.removeEventListener('mousemove', resV); }
+
+        window.addEventListener('keydown', function(e) {
+            if (document.activeElement.tagName === 'INPUT') return;
+            let step = 0.1, topR = document.getElementById('top-row'), b1 = document.getElementById('b1'), b3 = document.getElementById('b3');
+            let h = parseFloat(topR.style.height) || 50;
+            let w = parseFloat(b1.style.flexBasis) || 50;
+            if (b1.style.flex.includes('%')) w = parseFloat(b1.style.flex.split('%')[0].split(' ').pop());
+
+            if (e.key === 'ArrowUp') topR.style.height = (h - step) + "%";
+            if (e.key === 'ArrowDown') topR.style.height = (h + step) + "%";
+            if (e.key === 'ArrowLeft') { b1.style.flex = `0 0 ${w - step}%`; b3.style.flex = `0 0 ${w - step}%`; }
+            if (e.key === 'ArrowRight') { b1.style.flex = `0 0 ${w + step}%`; b3.style.flex = `0 0 ${w + step}%`; }
+            // Salva ajuste fino automaticamente
+            localStorage.setItem('multiwatch-h', topR.style.height);
+            localStorage.setItem('multiwatch-w', b1.style.flex.split(' ').pop());
+        });
 
         function toggleMenu() { document.getElementById('toolbar').classList.toggle('toolbar-hidden'); }
         function showMenu() { document.getElementById('toolbar').classList.remove('toolbar-hidden'); }
