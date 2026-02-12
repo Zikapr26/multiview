@@ -32,8 +32,14 @@
         .gutter-h { cursor: col-resize; width: 4px; }
         .gutter-v { cursor: row-resize; height: 4px; width: 100%; }
 
+        /* BARRA LATERAL DE CHAT */
         #chat-area { width: 320px; background: #000; display: flex; flex-direction: column; border-left: 1px solid #222; }
-        .chat-header { padding: 10px; background: #111; text-align: center; font-size: 10px; font-weight: bold; border-bottom: 1px solid #222; color: #ff0000; text-transform: uppercase; }
+        .chat-header { padding: 8px; background: #111; border-bottom: 1px solid #222; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .chat-title-text { font-size: 10px; font-weight: bold; color: #ff0000; text-transform: uppercase; letter-spacing: 1px; }
+        .chat-selector { display: flex; gap: 5px; }
+        .chat-selector button { padding: 4px 10px; font-size: 10px; background: #1a1a1a; border-color: #333; }
+        .chat-selector button:hover { background: #ff0000; color: white; border-color: #ff0000; }
+        
         .hide { display: none !important; }
 
         #menu-trigger { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 120px; height: 8px; z-index: 1001; cursor: pointer; }
@@ -63,14 +69,6 @@
             <button onclick="toggleChat()">CHAT</button>
             <button onclick="toggleMenu()">MENU</button>
         </div>
-
-        <div class="group">
-            <span>CHATS:</span>
-            <button style="padding: 2px 8px;" onclick="swapChat(1)">1</button>
-            <button style="padding: 2px 8px;" onclick="swapChat(2)">2</button>
-            <button style="padding: 2px 8px;" onclick="swapChat(3)">3</button>
-            <button style="padding: 2px 8px;" onclick="swapChat(4)">4</button>
-        </div>
     </div>
 
     <div id="main-container">
@@ -87,9 +85,18 @@
                 <div id="b4" class="video-box"><iframe id="v4"></iframe></div>
             </div>
         </div>
+        
         <div id="chat-area" class="hide">
-            <div class="chat-header" id="chat-title">CHAT: LIVE 1</div>
-            <iframe id="chat-frame"></iframe>
+            <div class="chat-header">
+                <span class="chat-title-text" id="chat-title">CHAT: LIVE 1</span>
+                <div class="chat-selector">
+                    <button onclick="swapChat(1)">1</button>
+                    <button onclick="swapChat(2)">2</button>
+                    <button onclick="swapChat(3)">3</button>
+                    <button onclick="swapChat(4)">4</button>
+                </div>
+            </div>
+            <iframe id="chat-frame" style="flex: 1;"></iframe>
         </div>
     </div>
 
@@ -136,7 +143,6 @@
                 ids[i-1] = videoId;
                 document.getElementById('v'+i).src = videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0` : "";
             }
-            // Inicia com o chat da primeira live disponível
             for(let j=0; j<4; j++) { if(ids[j]) { swapChat(j+1); break; } }
         }
 
@@ -149,7 +155,6 @@
                 rowB.classList.add('hide'); gV.classList.add('hide'); topR.style.height = "100%";
             } else if(modo === 'pilha') {
                 b2.classList.add('hide'); b4.classList.add('hide'); gH1.classList.add('hide'); gH2.classList.add('hide');
-                // Se a L2 tiver conteúdo e a L3 estiver vazia, mostra a L2 embaixo
                 if(!ids[2] && ids[1]) document.getElementById('v3').src = `https://www.youtube.com/embed/${ids[1]}?autoplay=1&rel=0`;
             }
         }
