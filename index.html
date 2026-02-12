@@ -4,42 +4,42 @@
     <meta charset="UTF-8">
     <title>MultiWatch - Zika Edition</title>
     <style>
+        /* Reset para evitar desalinhamento por arredondamento */
+        * { box-sizing: border-box; }
+        
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #000; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* Toolbar com transição suave e efeito elástico */
-        #toolbar { background: #111; padding: 8px 15px; display: flex; gap: 10px; align-items: center; border-bottom: 1px solid #333; z-index: 1000; flex-wrap: wrap; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; top: 0; }
-        .toolbar-hidden { transform: translateY(-110%); position: absolute; width: 100%; }
+        #toolbar { background: #111; padding: 8px 15px; display: flex; gap: 10px; align-items: center; border-bottom: 1px solid #333; z-index: 1000; transition: transform 0.3s; position: relative; }
+        .toolbar-hidden { transform: translateY(-100%); position: absolute; width: 100%; }
         
         .input-wrapper { position: relative; display: flex; align-items: center; }
-        input { background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 6px 25px 6px 10px; border-radius: 4px; width: 110px; font-size: 11px; outline: none; transition: border 0.2s; }
-        input:focus { border-color: #ff0000; }
+        input { background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 6px 20px 6px 10px; border-radius: 4px; width: 100px; font-size: 11px; outline: none; }
         .clear-btn { position: absolute; right: 5px; cursor: pointer; color: #555; font-size: 14px; font-weight: bold; border: none; background: none; }
-        .clear-btn:hover { color: #ff0000; }
         
-        button { background: #222; color: #eee; border: 1px solid #333; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.2s; }
-        button:hover { background: #333; border-color: #555; }
+        button { background: #222; color: #eee; border: 1px solid #333; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; }
+        button:hover { background: #333; }
         .btn-primary { background: #ff0000; border: none; color: white; }
-        .active-chat { border-color: #ff0000 !important; color: #ff0000 !important; box-shadow: 0 0 5px rgba(255,0,0,0.3); }
+        .active-chat { border-color: #ff0000 !important; color: #ff0000 !important; }
 
-        .group { display: flex; align-items: center; gap: 6px; border-left: 1px solid #333; padding-left: 10px; color: #666; font-size: 10px; }
+        .group { display: flex; align-items: center; gap: 6px; border-left: 1px solid #333; padding-left: 10px; }
         
         #main-container { display: flex; flex: 1; width: 100%; overflow: hidden; background: #000; }
-        #content-area { display: flex; flex-direction: column; flex: 1; position: relative; }
+        #content-area { display: flex; flex-direction: column; flex: 1; position: relative; background: #000; }
         
-        /* Centralização total do vídeo na box */
-        .video-box { position: relative; background: #000; overflow: hidden; display: flex; flex: 1; justify-content: center; align-items: center; }
-        iframe { width: 100%; height: 100%; border: none; background: #000; pointer-events: auto; }
+        /* Ajuste de encaixe: margin negativa para as lives "morderem" a borda uma da outra */
+        .video-box { position: relative; background: #000; overflow: hidden; display: flex; flex: 1; }
+        iframe { width: 100%; height: 100%; border: none; background: #000; position: absolute; top: 0; left: 0; }
 
-        .gutter { background: #111; z-index: 10; transition: background 0.3s; }
+        /* Gutter mais fina e precisa */
+        .gutter { background: #111; z-index: 10; flex-shrink: 0; }
         .gutter:hover { background: #ff0000 !important; }
-        .gutter-h { cursor: col-resize; width: 6px; }
-        .gutter-v { cursor: row-resize; height: 6px; width: 100%; }
+        .gutter-h { cursor: col-resize; width: 4px; margin: 0 -2px; } /* Sobreposição para alinhar quina */
+        .gutter-v { cursor: row-resize; height: 4px; width: 100%; margin: -2px 0; }
 
-        #chat-area { width: 350px; background: #000; display: flex; flex-direction: column; border-left: 1px solid #222; }
+        #chat-area { width: 320px; background: #000; display: flex; flex-direction: column; border-left: 1px solid #222; }
         .hide { display: none !important; }
-        
-        #menu-trigger { position: fixed; top: 0; left: 0; width: 100%; height: 10px; z-index: 1001; }
-        .resizing iframe { pointer-events: none; } /* Impede o iframe de roubar o foco no resize */
+        #menu-trigger { position: fixed; top: 0; left: 0; width: 100%; height: 8px; z-index: 1001; }
+        .resizing iframe { pointer-events: none; }
     </style>
 </head>
 <body>
@@ -47,17 +47,16 @@
     <div id="menu-trigger" onmouseover="showMenu()"></div>
 
     <div id="toolbar">
-        <div class="input-wrapper"><input type="text" id="in1" placeholder="Live 1"><button class="clear-btn" onclick="apagarSlot(1)">×</button></div>
-        <div class="input-wrapper"><input type="text" id="in2" placeholder="Live 2"><button class="clear-btn" onclick="apagarSlot(2)">×</button></div>
-        <div class="input-wrapper"><input type="text" id="in3" placeholder="Live 3"><button class="clear-btn" onclick="apagarSlot(3)">×</button></div>
-        <div class="input-wrapper"><input type="text" id="in4" placeholder="Live 4"><button class="clear-btn" onclick="apagarSlot(4)">×</button></div>
+        <div class="input-wrapper"><input type="text" id="in1" placeholder="L1"><button class="clear-btn" onclick="apagarSlot(1)">×</button></div>
+        <div class="input-wrapper"><input type="text" id="in2" placeholder="L2"><button class="clear-btn" onclick="apagarSlot(2)">×</button></div>
+        <div class="input-wrapper"><input type="text" id="in3" placeholder="L3"><button class="clear-btn" onclick="apagarSlot(3)">×</button></div>
+        <div class="input-wrapper"><input type="text" id="in4" placeholder="L4"><button class="clear-btn" onclick="apagarSlot(4)">×</button></div>
         
         <button class="btn-primary" onclick="carregar()">CARREGAR</button>
         <button onclick="salvar()">SALVAR</button>
         <button onclick="limparTudo()" style="color: #ff5555;">LIMPAR</button>
 
         <div class="group">
-            <span>LAYOUT:</span>
             <button onclick="mudarLayout('grade')">4T</button>
             <button onclick="mudarLayout('lado')">H</button>
             <button onclick="mudarLayout('pilha')">V</button>
@@ -69,7 +68,6 @@
         </div>
 
         <div class="group">
-            <span>CHATS:</span>
             <button onclick="swapChat(1)" id="c1">1</button>
             <button onclick="swapChat(2)" id="c2">2</button>
             <button onclick="swapChat(3)" id="c3">3</button>
@@ -121,14 +119,8 @@
             ids[n-1] = "";
         }
 
-        function limparTudo() { 
-            if(confirm("Limpar tudo?")) { for(let i=1; i<=4; i++) apagarSlot(i); }
-        }
-
-        function salvar() { 
-            for(let i=1; i<=4; i++) localStorage.setItem('l'+i, document.getElementById('in'+i).value); 
-            alert("Links salvos!"); 
-        }
+        function limparTudo() { if(confirm("Limpar tudo?")) for(let i=1; i<=4; i++) apagarSlot(i); }
+        function salvar() { for(let i=1; i<=4; i++) localStorage.setItem('l'+i, document.getElementById('in'+i).value); alert("Salvo!"); }
 
         function carregar() {
             for(let i=1; i<=4; i++) {
@@ -141,18 +133,12 @@
 
         function mudarLayout(modo) {
             const b1=document.getElementById('b1'), b2=document.getElementById('b2'), b3=document.getElementById('b3'), b4=document.getElementById('b4'), rowB=document.getElementById('bottom-row'), gV=document.getElementById('gV'), gH1=document.getElementById('gH1'), gH2=document.getElementById('gH2'), topR=document.getElementById('top-row');
-            
             [b1, b2, b3, b4, rowB, gV, gH1, gH2].forEach(el => el.classList.remove('hide'));
             topR.style.display = "flex"; topR.style.flexDirection = "row"; topR.style.height = "50%";
             rowB.style.display = "flex"; rowB.style.height = "50%";
             b1.style.flex = "1"; b2.style.flex = "1";
-
-            if(modo === 'lado') {
-                rowB.classList.add('hide'); gV.classList.add('hide'); topR.style.height = "100%";
-            } else if(modo === 'pilha') {
-                rowB.classList.add('hide'); gV.classList.add('hide'); gH1.classList.add('hide');
-                topR.style.flexDirection = "column"; topR.style.height = "100%";
-            }
+            if(modo === 'lado') { rowB.classList.add('hide'); gV.classList.add('hide'); topR.style.height = "100%"; } 
+            else if(modo === 'pilha') { rowB.classList.add('hide'); gV.classList.add('hide'); gH1.classList.add('hide'); topR.style.flexDirection = "column"; topR.style.height = "100%"; }
         }
 
         function swapChat(n) {
@@ -165,10 +151,9 @@
             }
         }
 
-        // Funções de Redimensionamento
         function initResizeH(e) { document.body.classList.add('resizing'); window.addEventListener('mousemove', resH); window.addEventListener('mouseup', stp); }
         function resH(e) { 
-            let chatW = document.getElementById('chat-area').classList.contains('hide') ? 0 : 350; 
+            let chatW = document.getElementById('chat-area').classList.contains('hide') ? 0 : 320; 
             let v = (e.clientX / (window.innerWidth - chatW)) * 100; 
             document.getElementById('b1').style.flex = `0 0 ${v}%`; 
             document.getElementById('b3').style.flex = `0 0 ${v}%`; 
@@ -180,12 +165,7 @@
             document.getElementById('top-row').style.height = v + "%"; 
         }
 
-        function stp() { 
-            document.body.classList.remove('resizing'); 
-            window.removeEventListener('mousemove', resH); 
-            window.removeEventListener('mousemove', resV); 
-        }
-
+        function stp() { document.body.classList.remove('resizing'); window.removeEventListener('mousemove', resH); window.removeEventListener('mousemove', resV); }
         function toggleMenu() { document.getElementById('toolbar').classList.toggle('toolbar-hidden'); }
         function showMenu() { document.getElementById('toolbar').classList.remove('toolbar-hidden'); }
         function toggleChat() { document.getElementById('chat-area').classList.toggle('hide'); }
