@@ -6,9 +6,8 @@
     <style>
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #000; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* Menu que oculta */
         #toolbar { background: #111; padding: 8px 15px; display: flex; gap: 10px; align-items: center; border-bottom: 1px solid #333; z-index: 1000; flex-wrap: wrap; transition: transform 0.3s; position: relative; }
-        .toolbar-hidden { transform: translateY(-100%); position: absolute; width: 100%; box-sizing: border-box; }
+        .toolbar-hidden { transform: translateY(-100%); position: absolute; width: 100%; }
         
         .input-wrapper { position: relative; display: flex; align-items: center; }
         input { background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 6px 25px 6px 10px; border-radius: 4px; width: 100px; font-size: 11px; outline: none; }
@@ -35,7 +34,6 @@
         #chat-area { width: 320px; background: #000; display: flex; flex-direction: column; border-left: 1px solid #222; }
         .hide { display: none !important; }
         
-        /* Trigger para o menu voltar */
         #menu-trigger { position: fixed; top: 0; left: 0; width: 100%; height: 8px; z-index: 1001; cursor: pointer; }
     </style>
 </head>
@@ -43,7 +41,7 @@
 
     <div id="menu-trigger" onmouseover="showMenu()"></div>
 
-    <div id="toolbar" id="toolbar">
+    <div id="toolbar">
         <div class="input-wrapper"><input type="text" id="in1" placeholder="L1"><button class="clear-btn" onclick="apagarSlot(1)">×</button></div>
         <div class="input-wrapper"><input type="text" id="in2" placeholder="L2"><button class="clear-btn" onclick="apagarSlot(2)">×</button></div>
         <div class="input-wrapper"><input type="text" id="in3" placeholder="L3"><button class="clear-btn" onclick="apagarSlot(3)">×</button></div>
@@ -127,16 +125,20 @@
         function mudarLayout(modo) {
             const b1=document.getElementById('b1'), b2=document.getElementById('b2'), b3=document.getElementById('b3'), b4=document.getElementById('b4'), rowB=document.getElementById('bottom-row'), gV=document.getElementById('gV'), gH1=document.getElementById('gH1'), gH2=document.getElementById('gH2'), topR=document.getElementById('top-row');
             
-            // RESET
+            // RESET TOTAL
             [b1, b2, b3, b4, rowB, gV, gH1, gH2].forEach(el => el.classList.remove('hide'));
-            topR.style.flexDirection = "row"; topR.style.height = "50%"; b1.style.flex = "1"; b2.style.flex = "1";
+            topR.style.display = "flex"; topR.style.flexDirection = "row"; topR.style.height = "50%";
+            rowB.style.display = "flex"; rowB.style.flexDirection = "row"; rowB.style.height = "50%";
+            b1.style.flex = "1"; b2.style.flex = "1"; b3.style.flex = "1"; b4.style.flex = "1";
 
             if(modo === 'lado') {
                 rowB.classList.add('hide'); gV.classList.add('hide'); topR.style.height = "100%";
             } else if(modo === 'pilha') {
-                // Vertical real com L1 e L2
-                b3.classList.add('hide'); b4.classList.add('hide'); gH1.classList.add('hide'); gV.classList.add('hide');
-                topR.style.flexDirection = "column"; topR.style.height = "100%";
+                // Vertical forçado: L1 topo, L2 baixo
+                b2.classList.add('hide'); b4.classList.add('hide'); gH1.classList.add('hide'); gH2.classList.add('hide');
+                topR.style.height = "50%"; rowB.style.height = "50%"; 
+                // Garante que o vídeo 2 apareça no slot 3 (abaixo do 1)
+                if(ids[1]) document.getElementById('v3').src = `https://www.youtube.com/embed/${ids[1]}?autoplay=1&rel=0`;
             }
         }
 
