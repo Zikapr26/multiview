@@ -33,7 +33,6 @@
 
         #chat-area { width: 320px; background: #000; display: flex; flex-direction: column; border-left: 1px solid #222; }
         .hide { display: none !important; }
-        
         #menu-trigger { position: fixed; top: 0; left: 0; width: 100%; height: 8px; z-index: 1001; cursor: pointer; }
     </style>
 </head>
@@ -123,23 +122,25 @@
         }
 
         function mudarLayout(modo) {
-            const b1=document.getElementById('b1'), b2=document.getElementById('b2'), b3=document.getElementById('b3'), b4=document.getElementById('b4'), rowB=document.getElementById('bottom-row'), gV=document.getElementById('gV'), gH1=document.getElementById('gH1'), gH2=document.getElementById('gH2'), topR=document.getElementById('top-row');
+            const b1=document.getElementById('b1'), b2=document.getElementById('b2'), b3=document.getElementById('b3'), b4=document.getElementById('b4'), rowB=document.getElementById('bottom-row'), gV=document.getElementById('gV'), gH1=document.getElementById('gH1'), gH2=document.getElementById('gH2'), topR=document.getElementById('top-row'), contentArea=document.getElementById('content-area');
             
-            // RESET TOTAL
+            // RESET
             [b1, b2, b3, b4, rowB, gV, gH1, gH2].forEach(el => el.classList.remove('hide'));
-            topR.style.display = "flex"; topR.style.flexDirection = "row"; topR.style.height = "50%";
-            rowB.style.display = "flex"; rowB.style.flexDirection = "row"; rowB.style.height = "50%";
+            contentArea.style.flexDirection = "column";
+            topR.style.flexDirection = "row";
+            topR.style.height = "50%";
+            rowB.style.height = "50%";
             b1.style.flex = "1"; b2.style.flex = "1"; b3.style.flex = "1"; b4.style.flex = "1";
 
             if(modo === 'lado') {
                 rowB.classList.add('hide'); gV.classList.add('hide'); topR.style.height = "100%";
             } else if(modo === 'pilha') {
-                // Vertical forçado: L1 topo, L2 baixo
-                b2.classList.add('hide'); b4.classList.add('hide'); gH1.classList.add('hide'); gH2.classList.add('hide');
-                topR.style.height = "50%"; rowB.style.height = "50%"; 
-                // Garante que o vídeo 2 apareça no slot 3 (abaixo do 1)
-                if(ids[1]) document.getElementById('v3').src = `https://www.youtube.com/embed/${ids[1]}?autoplay=1&rel=0`;
+                // Vertical real com L1 e L2 sem trocar links
+                b2.classList.add('hide'); b4.classList.add('hide'); gH1.classList.add('hide'); gH2.classList.add('hide'); rowB.classList.add('hide'); gV.classList.add('hide');
+                topR.style.flexDirection = "column"; topR.style.height = "100%";
             }
+            // Recarrega as lives conforme os campos para limpar duplicações
+            carregar();
         }
 
         function swapChat(n) {
