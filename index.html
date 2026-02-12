@@ -20,6 +20,8 @@
         .btn-danger { color: #ff5555; }
 
         .group { display: flex; align-items: center; gap: 8px; border-left: 1px solid #222; padding-left: 12px; height: 24px; color: #666; font-size: 11px; }
+        .chat-sel-btn { padding: 4px 8px !important; min-width: 25px; }
+        .active-chat { border-color: #ff0000 !important; color: #ff0000 !important; }
         
         #main-container { display: flex; flex: 1; width: 100%; overflow: hidden; background: #000; }
         #content-area { display: flex; flex-direction: column; flex: 1; }
@@ -32,14 +34,7 @@
         .gutter-h { cursor: col-resize; width: 4px; }
         .gutter-v { cursor: row-resize; height: 4px; width: 100%; }
 
-        /* BARRA LATERAL DE CHAT */
         #chat-area { width: 320px; background: #000; display: flex; flex-direction: column; border-left: 1px solid #222; }
-        .chat-header { padding: 8px; background: #111; border-bottom: 1px solid #222; display: flex; flex-direction: column; align-items: center; gap: 5px; }
-        .chat-title-text { font-size: 10px; font-weight: bold; color: #ff0000; text-transform: uppercase; letter-spacing: 1px; }
-        .chat-selector { display: flex; gap: 5px; }
-        .chat-selector button { padding: 4px 10px; font-size: 10px; background: #1a1a1a; border-color: #333; }
-        .chat-selector button:hover { background: #ff0000; color: white; border-color: #ff0000; }
-        
         .hide { display: none !important; }
 
         #menu-trigger { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 120px; height: 8px; z-index: 1001; cursor: pointer; }
@@ -57,7 +52,7 @@
         
         <button class="btn-primary" onclick="carregar()">CARREGAR</button>
         <button onclick="salvar()">SALVAR</button>
-        <button class="btn-danger" onclick="limparTudo()">LIMPAR TUDO</button>
+        <button class="btn-danger" onclick="limparTudo()">LIMPAR</button>
 
         <div class="group">
             <button onclick="mudarLayout('grade')">4T</button>
@@ -68,6 +63,14 @@
         <div class="group">
             <button onclick="toggleChat()">CHAT</button>
             <button onclick="toggleMenu()">MENU</button>
+        </div>
+
+        <div class="group">
+            <span>CHATS:</span>
+            <button class="chat-sel-btn" id="cbtn1" onclick="swapChat(1)">1</button>
+            <button class="chat-sel-btn" id="cbtn2" onclick="swapChat(2)">2</button>
+            <button class="chat-sel-btn" id="cbtn3" onclick="swapChat(3)">3</button>
+            <button class="chat-sel-btn" id="cbtn4" onclick="swapChat(4)">4</button>
         </div>
     </div>
 
@@ -87,16 +90,7 @@
         </div>
         
         <div id="chat-area" class="hide">
-            <div class="chat-header">
-                <span class="chat-title-text" id="chat-title">CHAT: LIVE 1</span>
-                <div class="chat-selector">
-                    <button onclick="swapChat(1)">1</button>
-                    <button onclick="swapChat(2)">2</button>
-                    <button onclick="swapChat(3)">3</button>
-                    <button onclick="swapChat(4)">4</button>
-                </div>
-            </div>
-            <iframe id="chat-frame" style="flex: 1;"></iframe>
+            <iframe id="chat-frame" style="flex: 1; height: 100%;"></iframe>
         </div>
     </div>
 
@@ -161,9 +155,10 @@
 
         function swapChat(n) {
             const videoId = ids[n-1];
+            document.querySelectorAll('.chat-sel-btn').forEach(b => b.classList.remove('active-chat'));
             if(videoId) {
                 document.getElementById('chat-frame').src = `https://www.youtube.com/live_chat?v=${videoId}&embed_domain=${domain}`;
-                document.getElementById('chat-title').innerText = "CHAT: LIVE " + n;
+                document.getElementById('cbtn' + n).classList.add('active-chat');
             }
         }
 
