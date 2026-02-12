@@ -97,12 +97,10 @@
         const domain = window.location.hostname || "localhost";
 
         window.onload = function() {
-            // Carrega links
             for(let i=1; i<=4; i++) {
                 const val = localStorage.getItem('l'+i);
                 if(val) document.getElementById('in'+i).value = val;
             }
-            // Carrega ajustes de quina
             const h = localStorage.getItem('multiwatch-h');
             const w = localStorage.getItem('multiwatch-w');
             if(h) document.getElementById('top-row').style.height = h;
@@ -131,7 +129,8 @@
         function salvar() { 
             for(let i=1; i<=4; i++) localStorage.setItem('l'+i, document.getElementById('in'+i).value); 
             localStorage.setItem('multiwatch-h', document.getElementById('top-row').style.height);
-            localStorage.setItem('multiwatch-w', document.getElementById('b1').style.flex.split(' ').pop());
+            let wVal = document.getElementById('b1').style.flex.split(' ').pop();
+            if(wVal) localStorage.setItem('multiwatch-w', wVal);
             alert("Links e Posições Salvos!"); 
         }
 
@@ -152,19 +151,22 @@
         }
 
         function mudarLayout(modo) {
-            const elements = ['b1', 'b2', 'b3', 'b4', 'bottom-row', 'gV', 'gH1', 'gH2'];
-            elements.forEach(id => document.getElementById(id).classList.remove('hide'));
-            const topR = document.getElementById('top-row'), rowB = document.getElementById('bottom-row');
-            
-            topR.style.display = "flex"; topR.style.flexDirection = "row";
-            rowB.style.display = "flex";
+            const idsList = ['b1', 'b2', 'b3', 'b4', 'gH1', 'gH2', 'gV', 'bottom-row', 'top-row'];
+            const els = {};
+            idsList.forEach(id => { els[id] = document.getElementById(id); els[id].classList.remove('hide'); });
+
+            els['top-row'].style.display = "flex"; els['top-row'].style.flexDirection = "row"; els['top-row'].style.height = "50%";
+            els['bottom-row'].style.display = "flex"; els['bottom-row'].style.height = "50%";
+            els['b1'].style.flex = "1"; els['b3'].style.flex = "1";
 
             if(modo === 'lado') {
-                ['b3', 'b4', 'bottom-row', 'gV'].forEach(id => document.getElementById(id).classList.add('hide'));
-                topR.style.height = "100%";
+                els['bottom-row'].classList.add('hide'); els['gV'].classList.add('hide'); els['top-row'].style.height = "100%";
             } else if(modo === 'pilha') {
-                ['b2', 'b4', 'gV', 'gH1', 'gH2', 'bottom-row'].forEach(id => document.getElementById(id).classList.add('hide'));
-                topR.style.flexDirection = "column"; topR.style.height = "100%";
+                // MODO VERTICAL CORRIGIDO:
+                els['b2'].classList.add('hide'); els['b4'].classList.add('hide');
+                els['gH1'].classList.add('hide'); els['gH2'].classList.add('hide');
+                els['top-row'].style.height = "50%"; els['bottom-row'].style.height = "50%";
+                els['b1'].style.flex = "1"; els['b3'].style.flex = "1";
             }
         }
 
@@ -180,7 +182,7 @@
         }
 
         function desmutarFoco() {
-            if(!chatAtivo) return alert("Selecione um chat primeiro!");
+            if(!chatAtivo) return;
             const id = ids[chatAtivo-1];
             if(id) document.getElementById('v'+chatAtivo).src = `https://www.youtube.com/embed/${id}?autoplay=1&mute=0&rel=0`;
         }
@@ -197,6 +199,7 @@
         function resV(e) { 
             let v = (e.clientY / window.innerHeight) * 100; 
             document.getElementById('top-row').style.height = v + "%"; 
+            document.getElementById('bottom-row').style.height = (100 - v) + "%";
         }
 
         function stp() { document.body.classList.remove('resizing'); window.removeEventListener('mousemove', resH); window.removeEventListener('mousemove', resV); }
@@ -205,14 +208,14 @@
             if (document.activeElement.tagName === 'INPUT') return;
             let step = 0.1, topR = document.getElementById('top-row'), b1 = document.getElementById('b1'), b3 = document.getElementById('b3');
             let h = parseFloat(topR.style.height) || 50;
-            let w = parseFloat(b1.style.flexBasis) || 50;
-            if (b1.style.flex.includes('%')) w = parseFloat(b1.style.flex.split('%')[0].split(' ').pop());
+            let w = 50;
+            if (b1.style.flex && b1.style.flex.includes('%')) w = parseFloat(b1.style.flex.split('%')[0].split(' ').pop());
 
             if (e.key === 'ArrowUp') topR.style.height = (h - step) + "%";
             if (e.key === 'ArrowDown') topR.style.height = (h + step) + "%";
             if (e.key === 'ArrowLeft') { b1.style.flex = `0 0 ${w - step}%`; b3.style.flex = `0 0 ${w - step}%`; }
             if (e.key === 'ArrowRight') { b1.style.flex = `0 0 ${w + step}%`; b3.style.flex = `0 0 ${w + step}%`; }
-            // Salva ajuste fino automaticamente
+            
             localStorage.setItem('multiwatch-h', topR.style.height);
             localStorage.setItem('multiwatch-w', b1.style.flex.split(' ').pop());
         });
