@@ -6,46 +6,44 @@
     <style>
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #000; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* Toolbar Superior Estilo Dark */
-        #toolbar { background: #111; padding: 8px 15px; display: flex; gap: 10px; align-items: center; border-bottom: 1px solid #222; z-index: 1000; flex-wrap: wrap; transition: transform 0.3s; }
+        /* Toolbar Superior */
+        #toolbar { background: #111; padding: 8px 15px; display: flex; gap: 10px; align-items: center; border-bottom: 1px solid #333; z-index: 1000; flex-wrap: wrap; transition: transform 0.3s; }
         .toolbar-hidden { transform: translateY(-100%); position: absolute; }
         
         .input-wrapper { position: relative; display: flex; align-items: center; }
-        input { background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 6px 25px 6px 10px; border-radius: 4px; width: 110px; font-size: 12px; outline: none; }
+        input { background: #222; border: 1px solid #444; color: #fff; padding: 6px 25px 6px 10px; border-radius: 4px; width: 110px; font-size: 12px; outline: none; }
         input:focus { border-color: #ff0000; }
         
-        .clear-btn { position: absolute; right: 5px; cursor: pointer; color: #555; font-size: 14px; font-weight: bold; border: none; background: none; padding: 0; }
+        /* Botão X dentro do input */
+        .clear-btn { position: absolute; right: 5px; cursor: pointer; color: #666; font-size: 14px; font-weight: bold; border: none; background: none; padding: 0; }
         .clear-btn:hover { color: #ff0000; }
         
-        button { background: #222; color: #eee; border: 1px solid #333; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; transition: 0.2s; }
-        button:hover { background: #333; border-color: #444; }
-        .btn-primary { background: #ff0000; border: none; color: white; }
+        button { background: #333; color: white; border: 1px solid #444; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; transition: 0.2s; }
+        button:hover { background: #444; border-color: #666; }
+        .btn-primary { background: #ff0000; border: none; }
         .btn-primary:hover { background: #cc0000; }
-        .btn-danger { color: #ff5555; }
+        .btn-danger { color: #ff5555; border-color: #552222; }
 
-        .group { display: flex; align-items: center; gap: 8px; border-left: 1px solid #222; padding-left: 12px; height: 24px; color: #666; font-size: 11px; }
-        input[type="range"] { width: 50px; accent-color: #ff0000; cursor: pointer; }
+        .group { display: flex; align-items: center; gap: 8px; border-left: 1px solid #333; padding-left: 12px; height: 24px; }
         
-        /* Área de Vídeo */
         #main-container { display: flex; flex: 1; width: 100%; overflow: hidden; background: #000; }
         #content-area { display: flex; flex-direction: column; flex: 1; }
         
         .video-box { position: relative; background: #000; overflow: hidden; display: flex; flex: 1; }
         iframe { width: 100%; height: 100%; border: none; }
 
-        /* Divisores Minimalistas (Multiwatch Style) */
+        /* Divisores Estilo Multiwatch */
         .gutter { background: #000; z-index: 10; transition: background 0.2s; }
         .gutter:hover { background: #ff0000 !important; }
         .gutter-h { cursor: col-resize; width: 4px; }
         .gutter-v { cursor: row-resize; height: 4px; width: 100%; }
 
-        /* Chat */
-        #chat-area { width: 320px; background: #000; display: flex; flex-direction: column; border-left: 1px solid #222; }
-        .chat-header { padding: 10px; background: #111; text-align: center; font-size: 10px; font-weight: bold; border-bottom: 1px solid #222; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+        #chat-area { width: 320px; background: #000; display: flex; flex-direction: column; border-left: 1px solid #333; }
+        .chat-header { padding: 10px; background: #111; text-align: center; font-size: 11px; font-weight: bold; border-bottom: 1px solid #222; color: #aaa; text-transform: uppercase; }
         .hide { display: none !important; }
 
-        /* Trigger invisível */
-        #menu-trigger { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 120px; height: 8px; z-index: 1001; cursor: pointer; }
+        #menu-trigger { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 100px; height: 10px; background: rgba(255,0,0,0.5); border-radius: 0 0 10px 10px; z-index: 1001; cursor: pointer; opacity: 0; transition: 0.2s; }
+        #menu-trigger:hover { opacity: 1; height: 20px; }
     </style>
 </head>
 <body>
@@ -53,29 +51,30 @@
     <div id="menu-trigger" onclick="toggleMenu()"></div>
 
     <div id="toolbar">
-        <div class="input-wrapper"><input type="text" id="in1" placeholder="Live 1"><button class="clear-btn" onclick="limparLive(1)">×</button></div>
-        <div class="input-wrapper"><input type="text" id="in2" placeholder="Live 2"><button class="clear-btn" onclick="limparLive(2)">×</button></div>
-        <div class="input-wrapper"><input type="text" id="in3" placeholder="Live 3"><button class="clear-btn" onclick="limparLive(3)">×</button></div>
-        <div class="input-wrapper"><input type="text" id="in4" placeholder="Live 4"><button class="clear-btn" onclick="limparLive(4)">×</button></div>
+        <div class="input-wrapper"><input type="text" id="in1" placeholder="L1"><button class="clear-btn" onclick="apagarSlot(1)">×</button></div>
+        <div class="input-wrapper"><input type="text" id="in2" placeholder="L2"><button class="clear-btn" onclick="apagarSlot(2)">×</button></div>
+        <div class="input-wrapper"><input type="text" id="in3" placeholder="L3"><button class="clear-btn" onclick="apagarSlot(3)">×</button></div>
+        <div class="input-wrapper"><input type="text" id="in4" placeholder="L4"><button class="clear-btn" onclick="apagarSlot(4)">×</button></div>
         
         <button class="btn-primary" onclick="carregar()">CARREGAR</button>
         <button onclick="salvar()">SALVAR</button>
         <button class="btn-danger" onclick="limparTudo()">LIMPAR TUDO</button>
 
         <div class="group">
-            <button onclick="mudarLayout('grade')">4T</button>
+            <button onclick="mudarLayout('grade')">4 TELAS</button>
             <button onclick="mudarLayout('lado')">H</button>
             <button onclick="mudarLayout('pilha')">V</button>
         </div>
 
         <div class="group">
-            <span>W:</span><input type="range" min="10" max="90" value="50" id="rangeW" oninput="ajustarLargura(this.value)">
-            <span>H:</span><input type="range" min="10" max="90" value="50" id="rangeH" oninput="ajustarAltura(this.value)">
-        </div>
-
-        <div class="group">
             <button onclick="toggleChat()">CHAT</button>
             <button onclick="toggleMenu()">MENU</button>
+        </div>
+
+        <div class="group" style="font-size: 10px; color: #666;">
+            Chat: 
+            <button style="padding: 2px 6px;" onclick="swapChat(1)">1</button>
+            <button style="padding: 2px 6px;" onclick="swapChat(2)">2</button>
         </div>
     </div>
 
@@ -101,15 +100,15 @@
 
     <script>
         let ids = ["", "", "", ""];
+
         window.onload = function() {
             for(let i=1; i<=4; i++) {
-                const saved = localStorage.getItem('l'+i);
-                if(saved) document.getElementById('in'+i).value = saved;
+                document.getElementById('in'+i).value = localStorage.getItem('l'+i) || "";
             }
             carregar();
         };
 
-        function limparLive(n) {
+        function apagarSlot(n) {
             document.getElementById('in' + n).value = "";
             document.getElementById('v' + n).src = "";
             localStorage.removeItem('l' + n);
@@ -117,8 +116,8 @@
         }
 
         function limparTudo() {
-            if(confirm("Limpar todos os links e vídeos?")) {
-                for(let i=1; i<=4; i++) limparLive(i);
+            if(confirm("Deseja limpar todos os campos e vídeos?")) {
+                for(let i=1; i<=4; i++) apagarSlot(i);
             }
         }
 
@@ -127,41 +126,68 @@
             alert("Links salvos!");
         }
 
-        function carregar() {
+        function getID(url) {
             const reg = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+            const m = url.match(reg);
+            return (m && m[1]) ? m[1] : null;
+        }
+
+        function carregar() {
             for(let i=1; i<=4; i++) {
-                const val = document.getElementById('in'+i).value;
-                const m = val.match(reg);
-                if(m && m[1]) {
-                    ids[i-1] = m[1];
+                const url = document.getElementById('in'+i).value;
+                ids[i-1] = getID(url);
+                if(ids[i-1]) {
                     document.getElementById('v'+i).src = `https://www.youtube.com/embed/${ids[i-1]}?autoplay=1&rel=0`;
                 } else {
-                    ids[i-1] = "";
                     document.getElementById('v'+i).src = "";
                 }
             }
+            swapChat(1);
         }
 
         function mudarLayout(modo) {
-            const b2=document.getElementById('b2'), b3=document.getElementById('b3'), b4=document.getElementById('b4'), rowB=document.getElementById('bottom-row'), gV=document.getElementById('gV'), gH1=document.getElementById('gH1'), gH2=document.getElementById('gH2');
-            [b2, b3, b4, rowB, gV, gH1, gH2].forEach(el => el.classList.remove('hide'));
-            document.getElementById('top-row').style.height = "50%";
+            const boxes = [document.getElementById('b2'), document.getElementById('b3'), document.getElementById('b4')];
+            const rows = [document.getElementById('bottom-row'), document.getElementById('gV'), document.getElementById('gH1'), document.getElementById('gH2')];
+            const topRow = document.getElementById('top-row');
+
+            // Reset total (Mostra tudo)
+            [...boxes, ...rows].forEach(el => el.classList.remove('hide'));
+            topRow.style.height = "50%";
             document.getElementById('b1').style.flex = "1";
             document.getElementById('b3').style.flex = "1";
 
-            if(modo === 'lado') { rowB.classList.add('hide'); gV.classList.add('hide'); document.getElementById('top-row').style.height = "100%"; }
-            else if(modo === 'pilha') { b2.classList.add('hide'); b4.classList.add('hide'); gH1.classList.add('hide'); gH2.classList.add('hide'); }
+            if(modo === 'lado') {
+                document.getElementById('bottom-row').classList.add('hide');
+                document.getElementById('gV').classList.add('hide');
+                topRow.style.height = "100%";
+            } else if(modo === 'pilha') {
+                document.getElementById('b2').classList.add('hide');
+                document.getElementById('b4').classList.add('hide');
+                document.getElementById('gH1').classList.add('hide');
+                document.getElementById('gH2').classList.add('hide');
+                // IMPORTANTE: Agora ele não move mais o vídeo da L2 para L3 sozinho.
+                // O que você colocar em L1 fica em cima, o que colocar em L3 fica embaixo.
+            }
         }
 
-        function ajustarLargura(v) { document.getElementById('b1').style.flex = `0 0 ${v}%`; document.getElementById('b3').style.flex = `0 0 ${v}%`; }
-        function ajustarAltura(v) { document.getElementById('top-row').style.height = v + "%"; }
-        function initResizeH(e) { window.addEventListener('mousemove', resH); window.addEventListener('mouseup', stp); }
-        function resH(e) { let v = (e.clientX / window.innerWidth) * 100; ajustarLargura(v); }
-        function initResizeV(e) { window.addEventListener('mousemove', resV); window.addEventListener('mouseup', stp); }
-        function resV(e) { let v = (e.clientY / window.innerHeight) * 100; ajustarAltura(v); }
-        function stp() { window.removeEventListener('mousemove', resH); window.removeEventListener('mousemove', resV); }
+        function initResizeH(e) { window.addEventListener('mousemove', resizeH); window.addEventListener('mouseup', stopResize); }
+        function resizeH(e) { 
+            let chatWidth = document.getElementById('chat-area').classList.contains('hide') ? 0 : 320;
+            let v = (e.clientX / (window.innerWidth - chatWidth)) * 100; 
+            document.getElementById('b1').style.flex = `0 0 ${v}%`; 
+            document.getElementById('b3').style.flex = `0 0 ${v}%`;
+        }
+        function initResizeV(e) { window.addEventListener('mousemove', resizeV); window.addEventListener('mouseup', stopResize); }
+        function resizeV(e) { let v = (e.clientY / window.innerHeight) * 100; document.getElementById('top-row').style.height = v + "%"; }
+        function stopResize() { window.removeEventListener('mousemove', resizeH); window.removeEventListener('mousemove', resizeV); }
+
         function toggleMenu() { document.getElementById('toolbar').classList.toggle('toolbar-hidden'); }
         function toggleChat() { document.getElementById('chat-area').classList.toggle('hide'); }
+        function swapChat(n) {
+            const tid = ids[n-1];
+            if(tid) document.getElementById('chat-frame').src = `https://www.youtube.com/live_chat?v=${tid}&embed_domain=${window.location.hostname}`;
+            document.getElementById('chat-title').innerText = "CHAT: LIVE " + n;
+        }
     </script>
 </body>
 </html>
