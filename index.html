@@ -4,47 +4,47 @@
     <meta charset="UTF-8">
     <title>MultiWatch - Zika Edition</title>
     <style>
-        /* Estrutura principal em Grid para garantir que o layout se ajuste ao espaço real */
-        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #000; color: white; display: grid; grid-template-rows: 40px 1fr; height: 100vh; overflow: hidden; transition: grid-template-rows 0.2s; }
+        body { margin: 0; font-family: sans-serif; background: #000; color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* Quando oculta, a linha do topo (barra) vai para 0 pixels e o vídeo ocupa tudo */
-        body.menu-hidden { grid-template-rows: 0px 1fr; }
+        /* Barra de ferramentas */
+        #toolbar { background: #111; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; height: 40px; border-bottom: 1px solid #333; z-index: 1000; flex-shrink: 0; transition: transform 0.2s; }
+        
+        /* Quando oculta, a barra sobe mas não trava o layout */
+        .menu-hidden #toolbar { transform: translateY(-40px); margin-bottom: -40px; }
 
-        #toolbar { background: #111; display: flex; align-items: center; border-bottom: 1px solid #333; z-index: 1000; padding: 0 15px; justify-content: space-between; overflow: hidden; }
+        #menu-to-hide { display: flex; gap: 8px; align-items: center; }
         
-        #menu-to-hide { display: flex; gap: 10px; align-items: center; }
-        
-        /* O Chat e os Números ficam visíveis, mas a barra por trás deles some no modo oculto */
-        #menu-persistent { display: flex; gap: 10px; align-items: center; z-index: 1002; }
-        .menu-hidden #menu-persistent { position: fixed; top: 0; right: 0; height: 40px; background: #111; padding: 0 15px; border-bottom: 1px solid #333; }
+        /* Botões 1 2 3 4 e CHAT: sempre no lugar certo */
+        #menu-persistent { display: flex; gap: 8px; align-items: center; background: #111; height: 40px; }
 
         .input-wrapper { position: relative; display: flex; align-items: center; }
-        input { background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 6px 25px 6px 10px; border-radius: 4px; width: 100px; font-size: 11px; outline: none; }
-        .clear-btn { position: absolute; right: 5px; cursor: pointer; color: #555; font-size: 14px; font-weight: bold; border: none; background: none; }
+        input { background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 4px 20px 4px 8px; border-radius: 4px; width: 90px; font-size: 11px; }
+        .clear-btn { position: absolute; right: 5px; cursor: pointer; color: #666; border: none; background: none; font-weight: bold; }
         
-        button { background: #222; color: #eee; border: 1px solid #333; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; }
+        button { background: #222; color: #eee; border: 1px solid #444; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
         button:hover { background: #333; }
         .btn-primary { background: #ff0000; border: none; }
         .active-chat { border-color: #ff0000 !important; color: #ff0000 !important; }
 
-        .group { display: flex; align-items: center; gap: 6px; border-left: 1px solid #333; padding-left: 10px; height: 24px; color: #666; font-size: 10px; }
+        .group { display: flex; align-items: center; gap: 5px; border-left: 1px solid #333; padding-left: 8px; color: #666; font-size: 10px; }
         
-        #main-container { display: flex; width: 100%; overflow: hidden; background: #000; }
-        #content-area { display: flex; flex-direction: column; flex: 1; position: relative; }
+        #main-container { display: flex; flex: 1; overflow: hidden; }
         
-        .video-box { position: relative; background: #000; overflow: hidden; display: flex; flex: 1; }
-        iframe { width: 100%; height: 100%; border: none; background: #000; display: block; }
+        /* O AUTO-LAYOUT QUE VOCÊ QUERIA: FLEXBOX */
+        #content-area { display: flex; flex-wrap: wrap; flex: 1; background: #000; }
+        
+        .video-box { position: relative; min-width: 45%; flex: 1 1 auto; background: #000; border: 1px solid #111; }
+        /* Se houver apenas uma live na linha, ela ocupa 100% */
+        .video-box:only-child { flex: 1 1 100%; } 
+        
+        iframe { width: 100%; height: 100%; border: none; display: block; }
 
-        .gutter { background: #000; z-index: 10; transition: background 0.2s; flex-shrink: 0; }
-        .gutter:hover { background: #ff0000 !important; }
-        .gutter-h { cursor: col-resize; width: 4px; }
-        .gutter-v { cursor: row-resize; height: 4px; width: 100%; }
-
-        #chat-area { width: 320px; background: #000; display: flex; flex-direction: column; border-left: 1px solid #222; }
-        .chat-container { flex: 1; width: 100%; height: 100%; display: none; background: #000; }
-        .chat-active { display: block !important; }
+        #chat-area { width: 320px; background: #000; border-left: 1px solid #222; display: flex; flex-direction: column; }
+        .chat-container { flex: 1; display: none; }
+        .chat-active { display: block; }
         
-        #menu-trigger { position: fixed; top: 0; left: 0; width: 100%; height: 10px; z-index: 1001; cursor: pointer; }
+        .hide { display: none !important; }
+        #menu-trigger { position: fixed; top: 0; left: 0; width: 100%; height: 8px; z-index: 1001; }
     </style>
 </head>
 <body>
@@ -63,12 +63,11 @@
             <button onclick="limparTudo()" style="color: #ff5555;">LIMPAR</button>
 
             <div class="group">
-                <button onclick="mudarLayout('grade')">4T</button>
-                <button onclick="mudarLayout('lado')">H</button>
-                <button onclick="mudarLayout('pilha')">V</button>
+                <button onclick="mudarLayout('4t')">4T</button>
+                <button onclick="mudarLayout('h')">H</button>
             </div>
 
-            <button onclick="toggleMenu()" style="background: #333; margin-left: 5px;">MENU</button>
+            <button onclick="toggleMenu()" style="background: #333;">MENU</button>
         </div>
 
         <div id="menu-persistent">
@@ -85,17 +84,10 @@
 
     <div id="main-container">
         <div id="content-area">
-            <div id="top-row" style="height: 50%; display: flex;">
-                <div id="b1" class="video-box"><iframe id="v1" allowfullscreen></iframe></div>
-                <div id="gH1" class="gutter gutter-h" onmousedown="initResizeH(event)"></div>
-                <div id="b2" class="video-box"><iframe id="v2" allowfullscreen></iframe></div>
-            </div>
-            <div id="gV" class="gutter gutter-v" onmousedown="initResizeV(event)"></div>
-            <div id="bottom-row" style="height: 50%; display: flex;">
-                <div id="b3" class="video-box"><iframe id="v3" allowfullscreen></iframe></div>
-                <div id="gH2" class="gutter gutter-h" onmousedown="initResizeH(event)"></div>
-                <div id="b4" class="video-box"><iframe id="v4" allowfullscreen></iframe></div>
-            </div>
+            <div id="b1" class="video-box hide"><iframe id="v1"></iframe></div>
+            <div id="b2" class="video-box hide"><iframe id="v2"></iframe></div>
+            <div id="b3" class="video-box hide"><iframe id="v3"></iframe></div>
+            <div id="b4" class="video-box hide"><iframe id="v4"></iframe></div>
         </div>
         <div id="chat-area" class="hide">
             <div id="chat-c1" class="chat-container"><iframe id="f1" style="width:100%;height:100%;"></iframe></div>
@@ -138,43 +130,25 @@
         }
 
         function carregar() {
-            let ativos = 0;
             for(let i=1; i<=4; i++) {
                 const val = document.getElementById('in'+i).value;
                 const data = getStreamData(val);
                 const box = document.getElementById('b'+i);
                 if(data) {
-                    ativos++;
                     ids[i-1] = data.id;
                     box.classList.remove('hide');
-                    let videoSrc = (data.platform === 'youtube') ? `https://www.youtube.com/embed/${data.id}?autoplay=1&mute=1&rel=0` :
+                    let videoSrc = (data.platform === 'youtube') ? `https://www.youtube.com/embed/${data.id}?autoplay=1&mute=1` :
                                    (data.platform === 'twitch') ? `https://player.twitch.tv/?channel=${data.id}&parent=${domain}&autoplay=true&muted=true` :
                                    `https://player.kick.com/${data.id}`;
-                    let chatSrc = (data.platform === 'youtube') ? `https://www.youtube.com/live_chat?v=${data.id}&embed_domain=${domain}&dark_theme=1` :
-                                  (data.platform === 'twitch') ? `https://www.twitch.tv/embed/${data.id}/chat?parent=${domain}&darkpopout` :
-                                  `https://kick.com/popout/${data.id}/chat`;
                     document.getElementById('v'+i).src = videoSrc;
-                    document.getElementById('f'+i).src = chatSrc;
+                    document.getElementById('f'+i).src = (data.platform === 'youtube') ? `https://www.youtube.com/live_chat?v=${data.id}&embed_domain=${domain}` :
+                                                         (data.platform === 'twitch') ? `https://www.twitch.tv/embed/${data.id}/chat?parent=${domain}` :
+                                                         `https://kick.com/popout/${data.id}/chat`;
                 } else {
-                    ids[i-1] = "";
-                    document.getElementById('v'+i).src = "";
-                    document.getElementById('f'+i).src = "";
                     box.classList.add('hide');
+                    document.getElementById('v'+i).src = "";
                 }
             }
-            autoLayout(ativos);
-        }
-
-        function autoLayout(qtd) {
-            const rowB = document.getElementById('bottom-row'), gV = document.getElementById('gV'), 
-                  gH1 = document.getElementById('gH1'), gH2 = document.getElementById('gH2'), 
-                  topR = document.getElementById('top-row'), b1=document.getElementById('b1'), b2=document.getElementById('b2');
-            [rowB, gV, gH1, gH2].forEach(el => el.classList.remove('hide'));
-            topR.style.display = "flex"; topR.style.flexDirection = "row"; topR.style.height = "50%"; b1.style.flex = "1"; b2.style.flex = "1";
-            if (qtd <= 2) {
-                rowB.classList.add('hide'); gV.classList.add('hide'); topR.style.height = "100%";
-                if (qtd === 1) gH1.classList.add('hide');
-            } else if (qtd === 3 && !ids[3]) { gH2.classList.add('hide'); }
         }
 
         function swapChat(n) {
@@ -183,36 +157,22 @@
             if(ids[n-1]) {
                 document.getElementById('chat-c' + n).classList.add('chat-active');
                 document.getElementById('c' + n).classList.add('active-chat');
-                if(document.getElementById('chat-area').classList.contains('hide')) toggleChat();
+                document.getElementById('chat-area').classList.remove('hide');
             }
         }
 
-        function apagarSlot(n) { document.getElementById('in' + n).value = ""; carregar(); localStorage.removeItem('l' + n); }
-        function limparTudo() { if(confirm("Limpar tudo?")) { for(let i=1; i<=4; i++) document.getElementById('in'+i).value = ""; carregar(); localStorage.clear(); } }
+        function apagarSlot(n) { document.getElementById('in' + n).value = ""; carregar(); }
+        function limparTudo() { localStorage.clear(); location.reload(); }
         function salvar() { for(let i=1; i<=4; i++) localStorage.setItem('l'+i, document.getElementById('in'+i).value); alert("Salvo!"); }
-
-        function mudarLayout(modo) {
-            const b1=document.getElementById('b1'), b2=document.getElementById('b2'), rowB=document.getElementById('bottom-row'), gV=document.getElementById('gV'), gH1=document.getElementById('gH1'), topR=document.getElementById('top-row');
-            [b1, b2, rowB, gV, gH1].forEach(el => el.classList.remove('hide'));
-            topR.style.display = "flex"; topR.style.flexDirection = "row"; topR.style.height = "50%";
-            if(modo === 'lado') { rowB.classList.add('hide'); gV.classList.add('hide'); topR.style.height = "100%"; } 
-            else if(modo === 'pilha') { rowB.classList.add('hide'); gV.classList.add('hide'); gH1.classList.add('hide'); topR.style.flexDirection = "column"; topR.style.height = "100%"; }
-        }
-
-        function initResizeH(e) { document.body.classList.add('resizing'); window.addEventListener('mousemove', resH); window.addEventListener('mouseup', stp); }
-        function resH(e) { 
-            let chatW = document.getElementById('chat-area').classList.contains('hide') ? 0 : 320; 
-            let v = (e.clientX / (window.innerWidth - chatW)) * 100; 
-            document.getElementById('b1').style.flex = `0 0 ${v}%`; document.getElementById('b3').style.flex = `0 0 ${v}%`; 
-        }
-
-        function initResizeV(e) { document.body.classList.add('resizing'); window.addEventListener('mousemove', resV); window.addEventListener('mouseup', stp); }
-        function resV(e) { let v = (e.clientY / window.innerHeight) * 100; document.getElementById('top-row').style.height = v + "%"; }
-        function stp() { document.body.classList.remove('resizing'); window.removeEventListener('mousemove', resH); window.removeEventListener('mousemove', resV); }
-
+        
         function toggleMenu() { document.body.classList.toggle('menu-hidden'); }
         function showMenu() { document.body.classList.remove('menu-hidden'); }
         function toggleChat() { document.getElementById('chat-area').classList.toggle('hide'); }
+        
+        function mudarLayout(m) {
+            const area = document.getElementById('content-area');
+            area.style.flexDirection = (m === 'h') ? 'column' : 'row';
+        }
     </script>
 </body>
 </html>
