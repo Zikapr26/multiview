@@ -4,38 +4,19 @@
     <meta charset="UTF-8">
     <title>MultiWatch - Zika Edition</title>
     <style>
-        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #000; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        /* Estrutura principal em Grid para garantir que o layout se ajuste ao espaço real */
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #000; color: white; display: grid; grid-template-rows: 40px 1fr; height: 100vh; overflow: hidden; transition: grid-template-rows 0.2s; }
         
-        #toolbar { 
-            background: #111; 
-            padding: 0 15px; 
-            display: flex; 
-            align-items: center; 
-            border-bottom: 1px solid #333; 
-            z-index: 1000; 
-            height: 40px; 
-            justify-content: space-between;
-            transition: margin-top 0.2s;
-        }
-        
-        /* O segredo: a barra sobe, mas o lado do chat compensa a posição */
-        .menu-hidden #toolbar { margin-top: -40px; border: none; background: transparent; }
+        /* Quando oculta, a linha do topo (barra) vai para 0 pixels e o vídeo ocupa tudo */
+        body.menu-hidden { grid-template-rows: 0px 1fr; }
 
-        #menu-to-hide { display: flex; gap: 10px; align-items: center; height: 40px; }
+        #toolbar { background: #111; display: flex; align-items: center; border-bottom: 1px solid #333; z-index: 1000; padding: 0 15px; justify-content: space-between; overflow: hidden; }
         
-        /* Mantém o chat e os números no lugar original, mesmo com a barra "fora da tela" */
-        #menu-persistent { 
-            display: flex; 
-            gap: 10px; 
-            align-items: center; 
-            height: 40px; 
-            background: #111; 
-            padding: 0 15px;
-            margin-right: -15px; /* Ajuste para colar na borda do chat */
-            border-bottom: 1px solid #333;
-            transition: transform 0.2s;
-        }
-        .menu-hidden #menu-persistent { transform: translateY(40px); }
+        #menu-to-hide { display: flex; gap: 10px; align-items: center; }
+        
+        /* O Chat e os Números ficam visíveis, mas a barra por trás deles some no modo oculto */
+        #menu-persistent { display: flex; gap: 10px; align-items: center; z-index: 1002; }
+        .menu-hidden #menu-persistent { position: fixed; top: 0; right: 0; height: 40px; background: #111; padding: 0 15px; border-bottom: 1px solid #333; }
 
         .input-wrapper { position: relative; display: flex; align-items: center; }
         input { background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 6px 25px 6px 10px; border-radius: 4px; width: 100px; font-size: 11px; outline: none; }
@@ -48,7 +29,7 @@
 
         .group { display: flex; align-items: center; gap: 6px; border-left: 1px solid #333; padding-left: 10px; height: 24px; color: #666; font-size: 10px; }
         
-        #main-container { display: flex; flex: 1; width: 100%; overflow: hidden; background: #000; }
+        #main-container { display: flex; width: 100%; overflow: hidden; background: #000; }
         #content-area { display: flex; flex-direction: column; flex: 1; position: relative; }
         
         .video-box { position: relative; background: #000; overflow: hidden; display: flex; flex: 1; }
