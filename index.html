@@ -8,7 +8,6 @@
         
         #toolbar { background: #111; padding: 8px 15px; display: flex; gap: 10px; align-items: center; border-bottom: 1px solid #333; z-index: 1000; height: 40px; }
         
-        /* O segredo: a visibilidade muda, mas o espaço continua lá pro layout não pular */
         .item-to-hide { display: flex; gap: 10px; align-items: center; }
         .menu-hidden .item-to-hide { visibility: hidden; pointer-events: none; }
 
@@ -63,11 +62,11 @@
                 <button onclick="mudarLayout('pilha')">V</button>
             </div>
             
+            <button onclick="toggleMenu()" style="background: #333; margin-left: 5px;">MENU</button>
+            
             <div class="group">
                 <button onclick="toggleChat()">CHAT</button>
             </div>
-
-            <button onclick="toggleMenu()" style="background: #333;">MENU</button>
         </div>
 
         <div class="group" style="border-left: 1px solid #333; padding-left: 10px;">
