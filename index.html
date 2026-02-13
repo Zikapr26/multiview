@@ -6,14 +6,36 @@
     <style>
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #000; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        #toolbar { background: #111; padding: 8px 15px; display: flex; align-items: center; border-bottom: 1px solid #333; z-index: 1000; height: 40px; justify-content: space-between; }
+        #toolbar { 
+            background: #111; 
+            padding: 0 15px; 
+            display: flex; 
+            align-items: center; 
+            border-bottom: 1px solid #333; 
+            z-index: 1000; 
+            height: 40px; 
+            justify-content: space-between;
+            transition: margin-top 0.2s;
+        }
         
-        /* A MÁGICA: Remove a barra do fluxo para o vídeo subir */
-        .menu-hidden #toolbar { display: none !important; }
+        /* O segredo: a barra sobe, mas o lado do chat compensa a posição */
+        .menu-hidden #toolbar { margin-top: -40px; border: none; background: transparent; }
 
-        /* Botões flutuantes que aparecem SÓ quando o menu some */
-        #floating-controls { display: none; position: fixed; top: 10px; right: 15px; z-index: 1002; background: rgba(17, 17, 17, 0.8); padding: 5px 10px; border-radius: 6px; border: 1px solid #333; align-items: center; gap: 10px; }
-        .menu-hidden #floating-controls { display: flex; }
+        #menu-to-hide { display: flex; gap: 10px; align-items: center; height: 40px; }
+        
+        /* Mantém o chat e os números no lugar original, mesmo com a barra "fora da tela" */
+        #menu-persistent { 
+            display: flex; 
+            gap: 10px; 
+            align-items: center; 
+            height: 40px; 
+            background: #111; 
+            padding: 0 15px;
+            margin-right: -15px; /* Ajuste para colar na borda do chat */
+            border-bottom: 1px solid #333;
+            transition: transform 0.2s;
+        }
+        .menu-hidden #menu-persistent { transform: translateY(40px); }
 
         .input-wrapper { position: relative; display: flex; align-items: center; }
         input { background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 6px 25px 6px 10px; border-radius: 4px; width: 100px; font-size: 11px; outline: none; }
@@ -41,25 +63,15 @@
         .chat-container { flex: 1; width: 100%; height: 100%; display: none; background: #000; }
         .chat-active { display: block !important; }
         
-        #menu-trigger { position: fixed; top: 0; left: 0; width: 100%; height: 15px; z-index: 1001; cursor: pointer; }
-        .resizing iframe { pointer-events: none; }
+        #menu-trigger { position: fixed; top: 0; left: 0; width: 100%; height: 10px; z-index: 1001; cursor: pointer; }
     </style>
 </head>
-<body class="menu-hidden"> <div id="menu-trigger" onmouseover="showMenu()"></div>
+<body>
 
-    <div id="floating-controls">
-        <button onclick="toggleChat()">CHAT</button>
-        <div class="group">
-            <span>CHATS:</span>
-            <button onclick="swapChat(1)" class="c-btn" data-idx="1">1</button>
-            <button onclick="swapChat(2)" class="c-btn" data-idx="2">2</button>
-            <button onclick="swapChat(3)" class="c-btn" data-idx="3">3</button>
-            <button onclick="swapChat(4)" class="c-btn" data-idx="4">4</button>
-        </div>
-    </div>
+    <div id="menu-trigger" onmouseover="showMenu()"></div>
 
     <div id="toolbar">
-        <div style="display: flex; gap: 10px; align-items: center;">
+        <div id="menu-to-hide">
             <div class="input-wrapper"><input type="text" id="in1" placeholder="L1"><button class="clear-btn" onclick="apagarSlot(1)">×</button></div>
             <div class="input-wrapper"><input type="text" id="in2" placeholder="L2"><button class="clear-btn" onclick="apagarSlot(2)">×</button></div>
             <div class="input-wrapper"><input type="text" id="in3" placeholder="L3"><button class="clear-btn" onclick="apagarSlot(3)">×</button></div>
@@ -78,14 +90,14 @@
             <button onclick="toggleMenu()" style="background: #333; margin-left: 5px;">MENU</button>
         </div>
 
-        <div style="display: flex; gap: 10px; align-items: center;">
+        <div id="menu-persistent">
             <button onclick="toggleChat()">CHAT</button>
             <div class="group">
                 <span>CHATS:</span>
-                <button onclick="swapChat(1)" class="c-btn" data-idx="1">1</button>
-                <button onclick="swapChat(2)" class="c-btn" data-idx="2">2</button>
-                <button onclick="swapChat(3)" class="c-btn" data-idx="3">3</button>
-                <button onclick="swapChat(4)" class="c-btn" data-idx="4">4</button>
+                <button onclick="swapChat(1)" id="c1">1</button>
+                <button onclick="swapChat(2)" id="c2">2</button>
+                <button onclick="swapChat(3)" id="c3">3</button>
+                <button onclick="swapChat(4)" id="c4">4</button>
             </div>
         </div>
     </div>
@@ -185,11 +197,11 @@
         }
 
         function swapChat(n) {
-            document.querySelectorAll('.c-btn').forEach(b => b.classList.remove('active-chat'));
+            document.querySelectorAll('.group button').forEach(b => b.classList.remove('active-chat'));
             document.querySelectorAll('.chat-container').forEach(c => c.classList.remove('chat-active'));
             if(ids[n-1]) {
                 document.getElementById('chat-c' + n).classList.add('chat-active');
-                document.querySelectorAll(`.c-btn[data-idx="${n}"]`).forEach(b => b.classList.add('active-chat'));
+                document.getElementById('c' + n).classList.add('active-chat');
                 if(document.getElementById('chat-area').classList.contains('hide')) toggleChat();
             }
         }
