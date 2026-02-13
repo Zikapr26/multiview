@@ -6,15 +6,15 @@
     <style>
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #000; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        #toolbar { background: #111; padding: 8px 15px; display: flex; gap: 10px; align-items: center; border-bottom: 1px solid #333; z-index: 1000; flex-wrap: wrap; transition: 0.3s; position: relative; }
+        #toolbar { background: #111; padding: 8px 15px; display: flex; align-items: center; border-bottom: 1px solid #333; z-index: 1000; transition: 0.3s; height: 40px; position: relative; }
         
-        /* Containers da barra */
-        #menu-links { display: flex; gap: 10px; align-items: center; }
-        #menu-fixed { display: flex; gap: 10px; align-items: center; }
+        /* Área que vai sumir (Links, Botões e o próprio botão Menu) */
+        #menu-to-hide { display: flex; gap: 10px; align-items: center; }
+        .menu-hidden #menu-to-hide { display: none; }
 
-        /* Classe para ocultar apenas os links e configurações */
-        .menu-hidden #menu-links { display: none; }
-        
+        /* Área dos Números (Sempre visível e na mesma posição) */
+        #menu-persistent { display: flex; align-items: center; gap: 10px; margin-left: 10px; }
+
         .input-wrapper { position: relative; display: flex; align-items: center; }
         input { background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 6px 25px 6px 10px; border-radius: 4px; width: 100px; font-size: 11px; outline: none; }
         .clear-btn { position: absolute; right: 5px; cursor: pointer; color: #555; font-size: 14px; font-weight: bold; border: none; background: none; }
@@ -24,7 +24,7 @@
         .btn-primary { background: #ff0000; border: none; }
         .active-chat { border-color: #ff0000 !important; color: #ff0000 !important; }
 
-        .group { display: flex; align-items: center; gap: 6px; border-left: 1px solid #222; padding-left: 10px; height: 24px; color: #666; font-size: 10px; }
+        .group { display: flex; align-items: center; gap: 6px; border-left: 1px solid #333; padding-left: 10px; height: 24px; color: #666; font-size: 10px; }
         
         #main-container { display: flex; flex: 1; width: 100%; overflow: hidden; background: #000; }
         #content-area { display: flex; flex-direction: column; flex: 1; position: relative; }
@@ -42,7 +42,9 @@
         .chat-active { display: block !important; }
         
         .hide { display: none !important; }
-        #menu-trigger { position: fixed; top: 0; left: 0; width: 100%; height: 4px; z-index: 1001; cursor: pointer; }
+
+        /* Gatilho invisível no topo para reativar o menu */
+        #menu-trigger { position: fixed; top: 0; left: 0; width: 100%; height: 12px; z-index: 1001; cursor: pointer; }
         
         .resizing iframe { pointer-events: none; }
     </style>
@@ -52,11 +54,11 @@
     <div id="menu-trigger" onmouseover="showMenu()"></div>
 
     <div id="toolbar">
-        <div id="menu-links">
-            <div class="input-wrapper"><input type="text" id="in1" placeholder="Live 1"><button class="clear-btn" onclick="apagarSlot(1)">×</button></div>
-            <div class="input-wrapper"><input type="text" id="in2" placeholder="Live 2"><button class="clear-btn" onclick="apagarSlot(2)">×</button></div>
-            <div class="input-wrapper"><input type="text" id="in3" placeholder="Live 3"><button class="clear-btn" onclick="apagarSlot(3)">×</button></div>
-            <div class="input-wrapper"><input type="text" id="in4" placeholder="Live 4"><button class="clear-btn" onclick="apagarSlot(4)">×</button></div>
+        <div id="menu-to-hide">
+            <div class="input-wrapper"><input type="text" id="in1" placeholder="L1"><button class="clear-btn" onclick="apagarSlot(1)">×</button></div>
+            <div class="input-wrapper"><input type="text" id="in2" placeholder="L2"><button class="clear-btn" onclick="apagarSlot(2)">×</button></div>
+            <div class="input-wrapper"><input type="text" id="in3" placeholder="L3"><button class="clear-btn" onclick="apagarSlot(3)">×</button></div>
+            <div class="input-wrapper"><input type="text" id="in4" placeholder="L4"><button class="clear-btn" onclick="apagarSlot(4)">×</button></div>
             
             <button class="btn-primary" onclick="carregar()">CARREGAR</button>
             <button onclick="salvar()">SALVAR</button>
@@ -71,11 +73,11 @@
             <div class="group">
                 <button onclick="toggleChat()">CHAT</button>
             </div>
+
+            <button onclick="toggleMenu()" style="margin-left: 5px; background: #333;">MENU</button>
         </div>
 
-        <div id="menu-fixed">
-            <button onclick="toggleMenu()">MENU</button>
-            
+        <div id="menu-persistent">
             <div class="group">
                 <span>CHATS:</span>
                 <button onclick="swapChat(1)" id="c1">1</button>
