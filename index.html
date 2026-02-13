@@ -8,9 +8,10 @@
         
         #toolbar { background: #111; padding: 8px 15px; display: flex; gap: 10px; align-items: center; border-bottom: 1px solid #333; z-index: 1000; height: 40px; justify-content: space-between; }
         
-        /* Área que oculta (Links, Carregar, Menu, Layouts) */
+        /* ALTERAÇÃO AQUI: Remove a barra do layout quando ocultada para o vídeo subir */
+        .menu-hidden #toolbar { display: none; }
+
         #menu-to-hide { display: flex; gap: 10px; align-items: center; }
-        .menu-hidden #menu-to-hide { visibility: hidden; pointer-events: none; }
 
         /* Área que SEMPRE fica visível (Botão CHAT e Números) */
         #menu-persistent { display: flex; gap: 10px; align-items: center; }
@@ -66,7 +67,7 @@
                 <button onclick="mudarLayout('pilha')">V</button>
             </div>
 
-            <button onclick="toggleMenu()" style="background: #333; margin-left: 5px;">MENU</button>
+            <button onclick="toggleMenu()" style="background: #333; margin-left: 5px;">OCULTAR</button>
         </div>
 
         <div id="menu-persistent">
@@ -211,8 +212,8 @@
         function resV(e) { let v = (e.clientY / window.innerHeight) * 100; document.getElementById('top-row').style.height = v + "%"; }
         function stp() { document.body.classList.remove('resizing'); window.removeEventListener('mousemove', resH); window.removeEventListener('mousemove', resV); }
 
-        function toggleMenu() { document.getElementById('toolbar').classList.toggle('menu-hidden'); }
-        function showMenu() { document.getElementById('toolbar').classList.remove('menu-hidden'); }
+        function toggleMenu() { document.body.classList.toggle('menu-hidden'); }
+        function showMenu() { document.body.classList.remove('menu-hidden'); }
         function toggleChat() { document.getElementById('chat-area').classList.toggle('hide'); }
     </script>
 </body>
