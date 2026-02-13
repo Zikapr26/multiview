@@ -4,48 +4,69 @@
     <meta charset="UTF-8">
     <title>MultiWatch - Zika Edition</title>
     <style>
-        /* GRID SYSTEM: Define o layout em linhas e colunas fixas */
+        /* Body em Flex Column: Toolbar em cima, Conteúdo embaixo */
         body { 
             margin: 0; 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
             background: #000; 
             color: white; 
-            display: grid;
-            grid-template-rows: 40px 1fr; /* Linha 1: Menu (40px), Linha 2: Conteúdo (Resto) */
-            grid-template-columns: 1fr auto; /* Coluna 1: Vídeos (Resto), Coluna 2: Chat (Auto) */
+            display: flex; 
+            flex-direction: column; 
             height: 100vh; 
+            width: 100vw;
             overflow: hidden; 
-            transition: grid-template-rows 0.2s;
         }
         
-        /* Quando oculto, a primeira linha do Grid vira 0px */
-        body.menu-hidden { grid-template-rows: 0px 1fr; }
-
+        /* Toolbar normal */
         #toolbar { 
-            grid-row: 1; 
-            grid-column: 1 / span 2; /* Ocupa a largura toda */
             background: #111; 
-            padding: 0 15px; 
+            padding: 8px 15px; 
             display: flex; 
+            gap: 10px; 
             align-items: center; 
             border-bottom: 1px solid #333; 
-            overflow: hidden; 
+            z-index: 1000; 
+            height: 40px; 
             justify-content: space-between;
-            z-index: 1000;
+            flex-shrink: 0;
         }
         
+        /* O segredo: Quando ocultar, o toolbar some e o resto da tela sobe 100% */
+        .hide-menu #toolbar { display: none !important; }
+
+        #menu-persistent { display: flex; gap: 10px; align-items: center; }
+        .input-wrapper { position: relative; display: flex; align-items: center; }
+        input { background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 6px 25px 6px 10px; border-radius: 4px; width: 100px; font-size: 11px; outline: none; }
+        .clear-btn { position: absolute; right: 5px; cursor: pointer; color: #555; font-size: 14px; font-weight: bold; border: none; background: none; }
+        
+        button { background: #222; color: #eee; border: 1px solid #333; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; }
+        button:hover { background: #333; }
+        .btn-primary { background: #ff0000; border: none; }
+        .active-chat { border-color: #ff0000 !important; color: #ff0000 !important; }
+
+        .group { display: flex; align-items: center; gap: 6px; border-left: 1px solid #333; padding-left: 10px; height: 24px; color: #666; font-size: 10px; }
+        
+        /* Container Principal: Vídeo e Chat LADO A LADO */
         #main-container { 
-            grid-row: 2; 
-            grid-column: 1; 
             display: flex; 
+            flex: 1; 
             width: 100%; 
-            height: 100%; 
+            height: 100%; /* Ocupa o que sobrar da tela */
             overflow: hidden; 
+            background: #000; 
         }
 
+        #content-area { display: flex; flex-direction: column; flex: 1; position: relative; }
+        .video-box { position: relative; background: #000; overflow: hidden; display: flex; flex: 1; }
+        iframe { width: 100%; height: 100%; border: none; background: #000; display: block; }
+
+        .gutter { background: #000; z-index: 10; transition: background 0.2s; flex-shrink: 0; }
+        .gutter:hover { background: #ff0000 !important; }
+        .gutter-h { cursor: col-resize; width: 4px; }
+        .gutter-v { cursor: row-resize; height: 4px; width: 100%; }
+
+        /* Área do Chat: Dentro do main-container para subir junto com o vídeo */
         #chat-area { 
-            grid-row: 2; 
-            grid-column: 2; 
             width: 320px; 
             background: #000; 
             display: flex; 
@@ -54,27 +75,11 @@
             height: 100%;
         }
 
-        /* CONFIGURAÇÕES GERAIS MANTIDAS */
-        #menu-to-hide, #menu-persistent { display: flex; gap: 10px; align-items: center; }
-        .input-wrapper { position: relative; display: flex; align-items: center; }
-        input { background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 6px 25px 6px 10px; border-radius: 4px; width: 100px; font-size: 11px; outline: none; }
-        .clear-btn { position: absolute; right: 5px; cursor: pointer; color: #555; font-size: 14px; font-weight: bold; border: none; background: none; }
-        button { background: #222; color: #eee; border: 1px solid #333; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; }
-        button:hover { background: #333; }
-        .btn-primary { background: #ff0000; border: none; }
-        .active-chat { border-color: #ff0000 !important; color: #ff0000 !important; }
-        .group { display: flex; align-items: center; gap: 6px; border-left: 1px solid #333; padding-left: 10px; height: 24px; color: #666; font-size: 10px; }
-        #content-area { display: flex; flex-direction: column; flex: 1; position: relative; }
-        .video-box { position: relative; background: #000; overflow: hidden; display: flex; flex: 1; }
-        iframe { width: 100%; height: 100%; border: none; background: #000; display: block; }
-        .gutter { background: #000; z-index: 10; flex-shrink: 0; }
-        .gutter:hover { background: #ff0000 !important; }
-        .gutter-h { cursor: col-resize; width: 4px; }
-        .gutter-v { cursor: row-resize; height: 4px; width: 100%; }
         .chat-container { flex: 1; width: 100%; height: 100%; display: none; background: #000; }
         .chat-active { display: block !important; }
+        
         .hide { display: none !important; }
-        #menu-trigger { position: fixed; top: 0; left: 0; width: 100%; height: 10px; z-index: 2001; cursor: pointer; }
+        #menu-trigger { position: fixed; top: 0; left: 0; width: 100%; height: 12px; z-index: 2000; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -82,21 +87,25 @@
     <div id="menu-trigger" onmouseover="showMenu()"></div>
 
     <div id="toolbar">
-        <div id="menu-to-hide">
+        <div id="menu-to-hide" style="display: flex; gap: 10px; align-items: center;">
             <div class="input-wrapper"><input type="text" id="in1" placeholder="L1"><button class="clear-btn" onclick="apagarSlot(1)">×</button></div>
             <div class="input-wrapper"><input type="text" id="in2" placeholder="L2"><button class="clear-btn" onclick="apagarSlot(2)">×</button></div>
             <div class="input-wrapper"><input type="text" id="in3" placeholder="L3"><button class="clear-btn" onclick="apagarSlot(3)">×</button></div>
             <div class="input-wrapper"><input type="text" id="in4" placeholder="L4"><button class="clear-btn" onclick="apagarSlot(4)">×</button></div>
+            
             <button class="btn-primary" onclick="carregar()">CARREGAR</button>
             <button onclick="salvar()">SALVAR</button>
             <button onclick="limparTudo()" style="color: #ff5555;">LIMPAR</button>
+
             <div class="group">
                 <button onclick="mudarLayout('grade')">4T</button>
                 <button onclick="mudarLayout('lado')">H</button>
                 <button onclick="mudarLayout('pilha')">V</button>
             </div>
+
             <button onclick="toggleMenu()" style="background: #333; margin-left: 5px;">MENU</button>
         </div>
+
         <div id="menu-persistent">
             <button onclick="toggleChat()">CHAT</button>
             <div class="group">
@@ -123,13 +132,13 @@
                 <div id="b4" class="video-box"><iframe id="v4" allowfullscreen></iframe></div>
             </div>
         </div>
-    </div>
-
-    <div id="chat-area" class="hide">
-        <div id="chat-c1" class="chat-container"><iframe id="f1" style="width:100%;height:100%;"></iframe></div>
-        <div id="chat-c2" class="chat-container"><iframe id="f2" style="width:100%;height:100%;"></iframe></div>
-        <div id="chat-c3" class="chat-container"><iframe id="f3" style="width:100%;height:100%;"></iframe></div>
-        <div id="chat-c4" class="chat-container"><iframe id="f4" style="width:100%;height:100%;"></iframe></div>
+        
+        <div id="chat-area" class="hide">
+            <div id="chat-c1" class="chat-container"><iframe id="f1" style="width:100%;height:100%;"></iframe></div>
+            <div id="chat-c2" class="chat-container"><iframe id="f2" style="width:100%;height:100%;"></iframe></div>
+            <div id="chat-c3" class="chat-container"><iframe id="f3" style="width:100%;height:100%;"></iframe></div>
+            <div id="chat-c4" class="chat-container"><iframe id="f4" style="width:100%;height:100%;"></iframe></div>
+        </div>
     </div>
 
     <script>
@@ -240,8 +249,9 @@
         function resV(e) { let v = (e.clientY / window.innerHeight) * 100; document.getElementById('top-row').style.height = v + "%"; }
         function stp() { window.removeEventListener('mousemove', resH); window.removeEventListener('mousemove', resV); }
 
-        function toggleMenu() { document.body.classList.toggle('menu-hidden'); }
-        function showMenu() { document.body.classList.remove('menu-hidden'); }
+        // MUDANÇA AQUI: toggleMenu agora mexe no BODY
+        function toggleMenu() { document.body.classList.toggle('hide-menu'); }
+        function showMenu() { document.body.classList.remove('hide-menu'); }
         function toggleChat() { document.getElementById('chat-area').classList.toggle('hide'); }
     </script>
 </body>
