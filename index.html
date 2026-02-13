@@ -6,13 +6,23 @@
     <style>
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #000; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        #toolbar { background: #111; padding: 8px 15px; display: flex; gap: 10px; align-items: center; border-bottom: 1px solid #333; z-index: 1000; height: 40px; justify-content: space-between; transition: height 0.2s; }
+        /* Toolbar fixo no fluxo, mas com margem animada */
+        #toolbar { 
+            background: #111; 
+            padding: 8px 15px; 
+            display: flex; 
+            gap: 10px; 
+            align-items: center; 
+            border-bottom: 1px solid #333; 
+            z-index: 1000; 
+            height: 40px; 
+            justify-content: space-between;
+            transition: margin-top 0.3s ease; /* A mágica acontece aqui */
+        }
         
-        /* ALTERAÇÃO: Quando ocultar, o lado esquerdo some de vez e a barra diminui */
-        .menu-hidden #menu-to-hide { display: none; }
-        .menu-hidden #toolbar { height: 30px; padding: 4px 15px; }
+        /* Quando oculto, ele sobe e 'puxa' o conteúdo de baixo */
+        .menu-hidden { margin-top: -41px !important; }
 
-        #menu-to-hide { display: flex; gap: 10px; align-items: center; }
         #menu-persistent { display: flex; gap: 10px; align-items: center; }
 
         .input-wrapper { position: relative; display: flex; align-items: center; }
@@ -50,7 +60,7 @@
     <div id="menu-trigger" onmouseover="showMenu()"></div>
 
     <div id="toolbar">
-        <div id="menu-to-hide">
+        <div id="menu-to-hide" style="display: flex; gap: 10px; align-items: center;">
             <div class="input-wrapper"><input type="text" id="in1" placeholder="L1"><button class="clear-btn" onclick="apagarSlot(1)">×</button></div>
             <div class="input-wrapper"><input type="text" id="in2" placeholder="L2"><button class="clear-btn" onclick="apagarSlot(2)">×</button></div>
             <div class="input-wrapper"><input type="text" id="in3" placeholder="L3"><button class="clear-btn" onclick="apagarSlot(3)">×</button></div>
@@ -104,7 +114,6 @@
     </div>
 
     <script>
-        // ... (resto do script igual ao seu anterior)
         let ids = ["", "", "", ""];
         let platforms = ["", "", "", ""];
         const domain = window.location.hostname || "localhost";
@@ -180,7 +189,7 @@
         }
 
         function swapChat(n) {
-            document.querySelectorAll('.group button').forEach(b => b.classList.remove('active-chat'));
+            document.querySelectorAll('#menu-persistent button').forEach(b => b.classList.remove('active-chat'));
             document.querySelectorAll('.chat-container').forEach(c => c.classList.remove('chat-active'));
             if(ids[n-1]) {
                 document.getElementById('chat-c' + n).classList.add('chat-active');
@@ -201,19 +210,19 @@
             else if(modo === 'pilha') { rowB.classList.add('hide'); gV.classList.add('hide'); gH1.classList.add('hide'); topR.style.flexDirection = "column"; topR.style.height = "100%"; }
         }
 
-        function initResizeH(e) { document.body.classList.add('resizing'); window.addEventListener('mousemove', resH); window.addEventListener('mouseup', stp); }
+        function initResizeH(e) { window.addEventListener('mousemove', resH); window.addEventListener('mouseup', stp); }
         function resH(e) { 
             let chatW = document.getElementById('chat-area').classList.contains('hide') ? 0 : 320; 
             let v = (e.clientX / (window.innerWidth - chatW)) * 100; 
             document.getElementById('b1').style.flex = `0 0 ${v}%`; document.getElementById('b3').style.flex = `0 0 ${v}%`; 
         }
 
-        function initResizeV(e) { document.body.classList.add('resizing'); window.addEventListener('mousemove', resV); window.addEventListener('mouseup', stp); }
+        function initResizeV(e) { window.addEventListener('mousemove', resV); window.addEventListener('mouseup', stp); }
         function resV(e) { let v = (e.clientY / window.innerHeight) * 100; document.getElementById('top-row').style.height = v + "%"; }
-        function stp() { document.body.classList.remove('resizing'); window.removeEventListener('mousemove', resH); window.removeEventListener('mousemove', resV); }
+        function stp() { window.removeEventListener('mousemove', resH); window.removeEventListener('mousemove', resV); }
 
-        function toggleMenu() { document.body.classList.toggle('menu-hidden'); }
-        function showMenu() { document.body.classList.remove('menu-hidden'); }
+        function toggleMenu() { document.getElementById('toolbar').classList.toggle('menu-hidden'); }
+        function showMenu() { document.getElementById('toolbar').classList.remove('menu-hidden'); }
         function toggleChat() { document.getElementById('chat-area').classList.toggle('hide'); }
     </script>
 </body>
