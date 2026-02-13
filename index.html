@@ -6,15 +6,13 @@
     <style>
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #000; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        #toolbar { background: #111; padding: 8px 15px; display: flex; align-items: center; border-bottom: 1px solid #333; z-index: 1000; height: 40px; gap: 10px; }
+        #toolbar { background: #111; padding: 8px 15px; display: flex; align-items: center; border-bottom: 1px solid #333; z-index: 1000; height: 40px; justify-content: flex-start; gap: 10px; }
         
-        /* Área que SOME (Links, Botões e o botão MENU) */
+        /* Área que some por completo */
         #menu-to-hide { display: flex; gap: 10px; align-items: center; }
         .menu-hidden #menu-to-hide { display: none; }
 
-        /* Área que FICA (Apenas os números dos chats) */
-        #menu-persistent { display: flex; align-items: center; gap: 10px; }
-
+        /* Estilo dos inputs e botões */
         .input-wrapper { position: relative; display: flex; align-items: center; }
         input { background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 6px 25px 6px 10px; border-radius: 4px; width: 100px; font-size: 11px; outline: none; }
         .clear-btn { position: absolute; right: 5px; cursor: pointer; color: #555; font-size: 14px; font-weight: bold; border: none; background: none; }
@@ -42,9 +40,7 @@
         .chat-active { display: block !important; }
         
         .hide { display: none !important; }
-        #menu-trigger { position: fixed; top: 0; left: 0; width: 100%; height: 15px; z-index: 1001; cursor: pointer; }
-        
-        .resizing iframe { pointer-events: none; }
+        #menu-trigger { position: fixed; top: 0; left: 0; width: 100%; height: 12px; z-index: 1001; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -52,25 +48,11 @@
     <div id="menu-trigger" onmouseover="showMenu()"></div>
 
     <div id="toolbar">
-        <div id="menu-persistent">
-            <div class="group" style="border: none; padding: 0;">
-                <span>CHATS:</span>
-                <button onclick="swapChat(1)" id="c1">1</button>
-                <button onclick="swapChat(2)" id="c2">2</button>
-                <button onclick="swapChat(3)" id="c3">3</button>
-                <button onclick="swapChat(4)" id="c4">4</button>
-            </div>
-        </div>
-
         <div id="menu-to-hide">
-            <button onclick="toggleMenu()" style="background: #333; margin-left: 5px;">MENU</button>
-            
-            <div class="group">
-                <div class="input-wrapper"><input type="text" id="in1" placeholder="L1"><button class="clear-btn" onclick="apagarSlot(1)">×</button></div>
-                <div class="input-wrapper"><input type="text" id="in2" placeholder="L2"><button class="clear-btn" onclick="apagarSlot(2)">×</button></div>
-                <div class="input-wrapper"><input type="text" id="in3" placeholder="L3"><button class="clear-btn" onclick="apagarSlot(3)">×</button></div>
-                <div class="input-wrapper"><input type="text" id="in4" placeholder="L4"><button class="clear-btn" onclick="apagarSlot(4)">×</button></div>
-            </div>
+            <div class="input-wrapper"><input type="text" id="in1" placeholder="L1"><button class="clear-btn" onclick="apagarSlot(1)">×</button></div>
+            <div class="input-wrapper"><input type="text" id="in2" placeholder="L2"><button class="clear-btn" onclick="apagarSlot(2)">×</button></div>
+            <div class="input-wrapper"><input type="text" id="in3" placeholder="L3"><button class="clear-btn" onclick="apagarSlot(3)">×</button></div>
+            <div class="input-wrapper"><input type="text" id="in4" placeholder="L4"><button class="clear-btn" onclick="apagarSlot(4)">×</button></div>
             
             <button class="btn-primary" onclick="carregar()">CARREGAR</button>
             <button onclick="salvar()">SALVAR</button>
@@ -84,6 +66,17 @@
             
             <div class="group">
                 <button onclick="toggleChat()">CHAT</button>
+            </div>
+
+            <button onclick="toggleMenu()" style="background: #333;">MENU</button>
+        </div>
+
+        <div id="menu-persistent">
+            <div class="group" style="border: none;">
+                <button onclick="swapChat(1)" id="c1">1</button>
+                <button onclick="swapChat(2)" id="c2">2</button>
+                <button onclick="swapChat(3)" id="c3">3</button>
+                <button onclick="swapChat(4)" id="c4">4</button>
             </div>
         </div>
     </div>
