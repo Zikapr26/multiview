@@ -6,107 +6,57 @@
     <style>
         body { margin: 0; font-family: sans-serif; background: #000; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* CONTAINER DAS ILHAS */
-        #island-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: space-between;
-            z-index: 2000;
-            pointer-events: none; /* Permite clicar nos vídeos por baixo se não houver menu */
-        }
+        #toolbar { position: fixed; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; z-index: 1000; pointer-events: none; }
+        
+        #menu-to-hide { background: #111; padding: 8px 15px; display: flex; gap: 10px; align-items: center; border: 1px solid #333; border-top: none; pointer-events: auto; transition: transform 0.3s ease; }
+        .menu-hidden #menu-to-hide { transform: translateY(-100%); }
 
-        /* ILHA VERMELHA (CONTROLES) */
-        #menu-to-hide { 
-            display: flex; 
-            gap: 10px; 
-            align-items: center; 
-            background: #111; 
-            padding: 8px 15px;
-            border: 1px solid #333;
-            border-top: none;
-            transition: transform 0.3s ease;
-            pointer-events: auto;
-        }
+        #menu-persistent { background: #111; padding: 8px 15px; display: flex; gap: 10px; align-items: center; border: 1px solid #333; border-top: none; pointer-events: auto; }
 
-        /* Estado Oculto da Ilha Vermelha */
-        .menu-hidden #menu-to-hide { 
-            transform: translateY(-100%); 
-        }
-
-        /* ILHA AZUL (CHAT - IMUTÁVEL) */
-        #menu-persistent { 
-            display: flex; 
-            gap: 10px; 
-            align-items: center; 
-            background: #111;
-            padding: 8px 15px;
-            border: 1px solid #333;
-            border-top: none;
-            pointer-events: auto;
-        }
-
-        /* INPUTS E BOTÕES - ESTILO ANTERIOR */
         .input-wrapper { position: relative; display: flex; align-items: center; }
-        input { background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 6px 5px; width: 100px; font-size: 11px; outline: none; }
-        .clear-btn { position: absolute; right: 5px; cursor: pointer; color: #555; border: none; background: none; }
-        button { background: #222; color: #eee; border: 1px solid #333; padding: 6px 10px; cursor: pointer; font-size: 11px; }
+        input { background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 6px 10px; width: 80px; font-size: 11px; outline: none; }
+        .clear-btn { position: absolute; right: 5px; cursor: pointer; color: #555; border: none; background: none; font-weight: bold; }
+        
+        button { background: #222; color: #eee; border: 1px solid #333; padding: 6px 10px; cursor: pointer; font-size: 11px; font-weight: 600; }
         button:hover { background: #333; }
-        .btn-primary { background: #ff0000; border: none; font-weight: bold; }
+        .btn-primary { background: #ff0000; border: none; }
         .active-chat { border-color: #ff0000 !important; color: #ff0000 !important; }
 
-        /* AJUSTE DO CONTEÚDO PARA NÃO SER ATROPELADO */
-        #main-container { 
-            display: flex; 
-            flex: 1; 
-            width: 100%; 
-            background: #000; 
-            margin-top: 50px; /* Espaço para as ilhas */
-            transition: margin-top 0.3s ease;
-        }
+        #main-container { display: flex; flex: 1; width: 100%; background: #000; margin-top: 45px; transition: margin-top 0.3s ease; }
+        .menu-hidden #main-container { margin-top: 0; }
         
-        /* Quando o menu sobe, o conteúdo sobe junto para ocupar o espaço */
-        .menu-hidden #main-container {
-            margin-top: 5px; 
-        }
-
         #content-area { display: flex; flex-direction: column; flex: 1; position: relative; }
         .video-box { position: relative; background: #000; overflow: hidden; display: flex; flex: 1; }
         iframe { width: 100%; height: 100%; border: none; }
 
         .gutter { background: #000; z-index: 10; }
         .gutter-h { cursor: col-resize; width: 4px; }
-        .gutter-v { cursor: row-resize; height: 4px; }
+        .gutter-v { cursor: row-resize; height: 4px; width: 100%; }
 
         #chat-area { width: 320px; background: #000; display: flex; flex-direction: column; border-left: 1px solid #222; }
         .chat-container { flex: 1; width: 100%; height: 100%; display: none; }
         .chat-active { display: block !important; }
         .hide { display: none !important; }
 
-        /* GATILHO SENSÍVEL NO TOPO */
-        #menu-trigger { position: fixed; top: 0; left: 0; width: 100%; height: 10px; z-index: 2100; }
+        #menu-trigger { position: fixed; top: 0; left: 0; width: 100%; height: 10px; z-index: 1001; }
     </style>
 </head>
 <body class="menu-hidden">
 
     <div id="menu-trigger" onmouseover="showMenu()"></div>
 
-    <div id="island-container">
-        <div id="menu-to-hide" onmouseleave="hideMenu()">
+    <div id="toolbar">
+        <div id="menu-to-hide">
             <div class="input-wrapper"><input type="text" id="in1" placeholder="L1"><button class="clear-btn" onclick="apagarSlot(1)">×</button></div>
             <div class="input-wrapper"><input type="text" id="in2" placeholder="L2"><button class="clear-btn" onclick="apagarSlot(2)">×</button></div>
             <div class="input-wrapper"><input type="text" id="in3" placeholder="L3"><button class="clear-btn" onclick="apagarSlot(3)">×</button></div>
             <div class="input-wrapper"><input type="text" id="in4" placeholder="L4"><button class="clear-btn" onclick="apagarSlot(4)">×</button></div>
-            
             <button class="btn-primary" onclick="carregar()">CARREGAR</button>
             <button onclick="salvar()">SALVAR</button>
-            <button onclick="limparTudo()">LIMPAR</button>
-
+            <button onclick="limparTudo()" style="color: #ff5555;">LIMPAR</button>
             <button onclick="mudarLayout('grade')">4T</button>
             <button onclick="mudarLayout('lado')">H</button>
-            <button onclick="mudarLayout('pilha')">V</button>
+            <button onclick="toggleMenu()" style="background: #333;">MENU</button>
         </div>
 
         <div id="menu-persistent">
@@ -171,42 +121,42 @@
         }
 
         function carregar() {
-            let ativos = 0;
             for(let i=1; i<=4; i++) {
                 const val = document.getElementById('in'+i).value;
                 const data = getStreamData(val);
                 const box = document.getElementById('b'+i);
                 if(data) {
-                    ativos++;
                     ids[i-1] = data.id;
                     box.classList.remove('hide');
                     document.getElementById('v'+i).src = (data.platform === 'youtube') ? `https://www.youtube.com/embed/${data.id}?autoplay=1&mute=1` :
                                    (data.platform === 'twitch') ? `https://player.twitch.tv/?channel=${data.id}&parent=${domain}&autoplay=true&muted=true` :
                                    `https://player.kick.com/${data.id}`;
-                    
-                    let chatSrc = (data.platform === 'youtube') ? `https://www.youtube.com/live_chat?v=${data.id}&embed_domain=${domain}&dark_theme=1` :
+                    document.getElementById('f'+i).src = (data.platform === 'youtube') ? `https://www.youtube.com/live_chat?v=${data.id}&embed_domain=${domain}&dark_theme=1` :
                                   (data.platform === 'twitch') ? `https://www.twitch.tv/embed/${data.id}/chat?parent=${domain}&darkpopout` :
                                   `https://kick.com/popout/${data.id}/chat`;
-                    document.getElementById('f'+i).src = chatSrc;
                 } else {
-                    ids[i-1] = "";
-                    document.getElementById('v'+i).src = "";
-                    box.classList.add('hide');
+                    ids[i-1] = ""; document.getElementById('v'+i).src = ""; box.classList.add('hide');
                 }
             }
-            autoLayout(ativos);
+            autoLayout();
         }
 
-        function autoLayout(qtd) {
-            const rowB = document.getElementById('bottom-row'), gV = document.getElementById('gV'), 
-                  gH1 = document.getElementById('gH1'), gH2 = document.getElementById('gH2'), 
-                  topR = document.getElementById('top-row');
-            [rowB, gV, gH1, gH2].forEach(el => el.classList.remove('hide'));
-            topR.style.height = "50%";
-            if (qtd <= 2) {
-                rowB.classList.add('hide'); gV.classList.add('hide'); topR.style.height = "100%";
-                if (qtd === 1) gH1.classList.add('hide');
-            }
+        function autoLayout() {
+            const b1 = document.getElementById('b1'), b2 = document.getElementById('b2'), b3 = document.getElementById('b3'), b4 = document.getElementById('b4');
+            const topR = document.getElementById('top-row'), botR = document.getElementById('bottom-row'), gV = document.getElementById('gV');
+            const gH1 = document.getElementById('gH1'), gH2 = document.getElementById('gH2');
+
+            // Reseta tudo para o padrão
+            [topR, botR, gV, gH1, gH2].forEach(el => el.classList.remove('hide'));
+            topR.style.height = "50%"; b1.style.flex = "1"; b2.style.flex = "1"; b3.style.flex = "1"; b4.style.flex = "1";
+
+            // Lógica de preenchimento
+            if (!ids[0] && !ids[1]) { topR.classList.add('hide'); gV.classList.add('hide'); } 
+            if (!ids[2] && !ids[3]) { botR.classList.add('hide'); gV.classList.add('hide'); topR.style.height = "100%"; }
+            if (ids[0] && !ids[1]) gH1.classList.add('hide');
+            if (ids[2] && !ids[3]) gH2.classList.add('hide');
+            if (!ids[0] && ids[1]) gH1.classList.add('hide');
+            if (!ids[2] && ids[3]) gH2.classList.add('hide');
         }
 
         function swapChat(n) {
@@ -219,15 +169,14 @@
             }
         }
 
-        function toggleChat() { document.getElementById('chat-area').classList.toggle('hide'); }
+        function toggleMenu() { document.body.classList.toggle('menu-hidden'); }
         function showMenu() { document.body.classList.remove('menu-hidden'); }
         function hideMenu() { document.body.classList.add('menu-hidden'); }
-
+        function toggleChat() { document.getElementById('chat-area').classList.toggle('hide'); }
         function apagarSlot(n) { document.getElementById('in' + n).value = ""; carregar(); }
         function salvar() { for(let i=1; i<=4; i++) localStorage.setItem('l'+i, document.getElementById('in'+i).value); alert("Salvo!"); }
-        function limparTudo() { localStorage.clear(); location.reload(); }
+        function limparTudo() { if(confirm("Limpar tudo?")) { localStorage.clear(); location.reload(); } }
 
-        /* RESIZE LOGIC */
         function initResizeH(e) { window.addEventListener('mousemove', resH); window.addEventListener('mouseup', stp); }
         function resH(e) { 
             let chatW = document.getElementById('chat-area').classList.contains('hide') ? 0 : 320; 
@@ -239,9 +188,8 @@
         function stp() { window.removeEventListener('mousemove', resH); window.removeEventListener('mousemove', resV); }
 
         function mudarLayout(modo) {
-            const topR = document.getElementById('top-row'), rowB = document.getElementById('bottom-row');
-            if(modo === 'lado') { rowB.classList.add('hide'); topR.style.height = "100%"; }
-            else { rowB.classList.remove('hide'); topR.style.height = "50%"; }
+            if(modo === 'lado') { document.getElementById('bottom-row').classList.add('hide'); document.getElementById('top-row').style.height = "100%"; }
+            else { carregar(); }
         }
     </script>
 </body>
