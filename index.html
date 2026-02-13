@@ -167,7 +167,8 @@
                 } else if (platform === 'twitch') {
                     chatSrc = `https://www.twitch.tv/embed/${videoId}/chat?parent=${domain}&darkpopout`;
                 } else if (platform === 'kick') {
-                    chatSrc = `https://kick.com/chat/${videoId}`;
+                    // Atualizado para o modo popout que evita o erro "Oops"
+                    chatSrc = `https://kick.com/popout/${videoId}/chat`;
                 }
                 document.getElementById('chat-frame').src = chatSrc;
                 document.getElementById('c' + n).classList.add('active-chat');
