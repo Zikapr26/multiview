@@ -8,12 +8,12 @@
         
         #toolbar { background: #111; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; height: 40px; border-bottom: 1px solid #333; z-index: 1000; flex-shrink: 0; transition: margin-top 0.2s; }
         
-        /* Oculta a barra subindo ela, pra não deixar buraco */
+        /* Oculta a barra subindo ela para o vídeo colar no topo */
         .menu-hidden #toolbar { margin-top: -40px; }
 
         #menu-to-hide { display: flex; gap: 8px; align-items: center; }
         
-        /* Controles de Chat que NÃO somem */
+        /* Controles que ficam visíveis mesmo ocultando o menu */
         #menu-persistent { display: flex; gap: 8px; align-items: center; background: #111; height: 40px; transition: transform 0.2s; z-index: 1002; }
         .menu-hidden #menu-persistent { transform: translateY(40px); border-bottom: 1px solid #333; padding: 0 15px; margin-right: -15px; }
 
@@ -21,7 +21,7 @@
         input { background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 4px 20px 4px 8px; border-radius: 4px; width: 90px; font-size: 11px; outline: none; }
         .clear-btn { position: absolute; right: 5px; cursor: pointer; color: #666; border: none; background: none; font-weight: bold; }
         
-        button { background: #222; color: #eee; border: 1px solid #444; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+        button { background: #222; color: #eee; border: 1px solid #333; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
         button:hover { background: #333; }
         .btn-primary { background: #ff0000; border: none; }
         .active-chat { border-color: #ff0000 !important; color: #ff0000 !important; }
@@ -30,12 +30,9 @@
         
         #main-container { display: flex; flex: 1; overflow: hidden; }
         
-        /* ÁREA DE VÍDEO COM AUTO-ADJUST (FLEX) */
+        /* AUTO-AJUSTE DAS JANELAS (FLEX) */
         #content-area { display: flex; flex-wrap: wrap; flex: 1; background: #000; align-content: stretch; }
-        
         .video-box { position: relative; flex: 1 1 45%; min-width: 300px; background: #000; border: 1px solid #111; box-sizing: border-box; }
-        
-        /* Se for o único na linha (ex: L3 sozinha embaixo), ocupa 100% */
         .video-box.wide { flex: 1 1 100%; }
 
         iframe { width: 100%; height: 100%; border: none; display: block; }
@@ -145,7 +142,9 @@
                                (data.platform === 'twitch') ? `https://player.twitch.tv/?channel=${data.id}&parent=${domain}&autoplay=true&muted=true` :
                                `https://player.kick.com/${data.id}`;
                     document.getElementById('v'+i).src = vSrc;
-                    document.getElementById('f'+i).src = (data.platform === 'youtube') ? `https://www.youtube.com/live_chat?v=${data.id}&embed_domain=${domain}` :
+                    
+                    // CHAT ESCURO AQUI
+                    document.getElementById('f'+i).src = (data.platform === 'youtube') ? `https://www.youtube.com/live_chat?v=${data.id}&embed_domain=${domain}&dark_theme=1` :
                                                          (data.platform === 'twitch') ? `https://www.twitch.tv/embed/${data.id}/chat?parent=${domain}` :
                                                          `https://kick.com/popout/${data.id}/chat`;
                 } else {
@@ -153,7 +152,6 @@
                     document.getElementById('v'+i).src = "";
                 }
             }
-            // Lógica para expandir a última live se ela estiver sozinha na linha
             if (slotsAtivos.length === 3) slotsAtivos[2].classList.add('wide');
             if (slotsAtivos.length === 1) slotsAtivos[0].classList.add('wide');
         }
@@ -171,7 +169,7 @@
         function mudarLayout(m) {
             const area = document.getElementById('content-area');
             const boxes = document.querySelectorAll('.video-box');
-            boxes.forEach(b => b.classList.remove('wide'));
+            boxes.forEach(b => { b.classList.remove('wide'); b.style.flex = ""; });
             if(m === 'h') { area.style.flexDirection = 'column'; boxes.forEach(b => b.classList.add('wide')); }
             else if(m === 'v') { area.style.flexDirection = 'row'; boxes.forEach(b => b.style.flex = '1 1 20%'); }
             else { area.style.flexDirection = 'row'; carregar(); }
