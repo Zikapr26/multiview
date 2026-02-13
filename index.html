@@ -174,18 +174,22 @@
         function autoLayout(qtd) {
             const rowB = document.getElementById('bottom-row'), gV = document.getElementById('gV'), 
                   gH1 = document.getElementById('gH1'), gH2 = document.getElementById('gH2'), 
-                  topR = document.getElementById('top-row');
+                  topR = document.getElementById('top-row'),
+                  b1=document.getElementById('b1'), b2=document.getElementById('b2');
 
-            // Reset inicial
+            // Reset total para garantir que o automático funcione
             [rowB, gV, gH1, gH2].forEach(el => el.classList.remove('hide'));
+            topR.style.display = "flex"; topR.style.flexDirection = "row";
             topR.style.height = "50%"; rowB.style.height = "50%";
+            b1.style.flex = "1"; b2.style.flex = "1";
 
             if (qtd <= 2) {
                 rowB.classList.add('hide'); gV.classList.add('hide'); topR.style.height = "100%";
                 if (qtd === 1) gH1.classList.add('hide');
             } else if (qtd === 3) {
-                // Se o 3 e 4 estão vazios, ajusta a grade
-                if (!ids[2] && !ids[3]) { rowB.classList.add('hide'); gV.classList.add('hide'); }
+                // Se só tem 3, a linha de baixo fica com 1 só centralizado se preferir, 
+                // ou mantém a grade escondendo o slot vazio.
+                if (!ids[3]) gH2.classList.add('hide');
             }
         }
 
@@ -210,9 +214,17 @@
 
         function mudarLayout(modo) {
             const b1=document.getElementById('b1'), b2=document.getElementById('b2'), b3=document.getElementById('b3'), b4=document.getElementById('b4'), rowB=document.getElementById('bottom-row'), gV=document.getElementById('gV'), gH1=document.getElementById('gH1'), gH2=document.getElementById('gH2'), topR=document.getElementById('top-row');
-            [b1, b2, b3, b4, rowB, gV, gH1, gH2].forEach(el => el.classList.remove('hide'));
+            
+            // Re-exibe tudo para aplicar o modo manual
+            [b1, b2, b3, b4, rowB, gV, gH1, gH2].forEach(el => {
+                const idNum = el.id.replace(/\D/g,'');
+                if(!idNum || ids[idNum-1]) el.classList.remove('hide');
+            });
+
             topR.style.display = "flex"; topR.style.flexDirection = "row"; topR.style.height = "50%";
             rowB.style.display = "flex"; rowB.style.height = "50%";
+            b1.style.flex = "1"; b2.style.flex = "1";
+
             if(modo === 'lado') { rowB.classList.add('hide'); gV.classList.add('hide'); topR.style.height = "100%"; } 
             else if(modo === 'pilha') { rowB.classList.add('hide'); gV.classList.add('hide'); gH1.classList.add('hide'); topR.style.flexDirection = "column"; topR.style.height = "100%"; }
         }
