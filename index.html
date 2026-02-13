@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>MultiWatch - YouTube, Twitch & Kick</title>
+    <title>MultiWatch - Pro Edition</title>
     <style>
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #000; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
@@ -32,6 +32,9 @@
         .gutter-v { cursor: row-resize; height: 4px; width: 100%; }
 
         #chat-area { width: 320px; background: #000; display: flex; flex-direction: column; border-left: 1px solid #222; }
+        .chat-container { flex: 1; width: 100%; height: 100%; display: none; }
+        .chat-active { display: block !important; }
+        
         .hide { display: none !important; }
         #menu-trigger { position: fixed; top: 0; left: 0; width: 100%; height: 8px; z-index: 1001; cursor: pointer; }
         
@@ -87,7 +90,10 @@
             </div>
         </div>
         <div id="chat-area" class="hide">
-            <iframe id="chat-frame" style="flex: 1; height: 100%;"></iframe>
+            <div id="chat-c1" class="chat-container"><iframe id="f1" style="width:100%;height:100%;"></iframe></div>
+            <div id="chat-c2" class="chat-container"><iframe id="f2" style="width:100%;height:100%;"></iframe></div>
+            <div id="chat-c3" class="chat-container"><iframe id="f3" style="width:100%;height:100%;"></iframe></div>
+            <div id="chat-c4" class="chat-container"><iframe id="f4" style="width:100%;height:100%;"></iframe></div>
         </div>
     </div>
 
@@ -106,28 +112,21 @@
 
         function getStreamData(url) {
             if (!url) return null;
-            
-            // YouTube
             if (url.includes("youtube.com") || url.includes("youtu.be")) {
                 const reg = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
                 const m = url.match(reg);
                 return (m && m[1]) ? { id: m[1], platform: 'youtube' } : null;
             }
-            
-            // Twitch
             if (url.includes("twitch.tv")) {
                 const parts = url.split('/');
                 const id = parts[parts.length - 1] || parts[parts.length - 2];
                 return { id: id.split('?')[0], platform: 'twitch' };
             }
-
-            // Kick
             if (url.includes("kick.com")) {
                 const parts = url.split('/');
                 const id = parts[parts.length - 1] || parts[parts.length - 2];
                 return { id: id.split('?')[0], platform: 'kick' };
             }
-            
             return null;
         }
 
@@ -139,38 +138,32 @@
                 if(data) {
                     ids[i-1] = data.id;
                     platforms[i-1] = data.platform;
+                    
+                    // Carrega Vídeo
                     let finalSrc = "";
-
-                    if (data.platform === 'youtube') {
-                        finalSrc = `https://www.youtube.com/embed/${data.id}?autoplay=1&mute=1&rel=0`;
-                    } 
-                    else if (data.platform === 'twitch') {
-                        finalSrc = `https://player.twitch.tv/?channel=${data.id}&parent=${domain}&autoplay=true&muted=true`;
-                    } 
-                    else if (data.platform === 'kick') {
-                        finalSrc = `https://player.kick.com/${data.id}`;
-                    }
+                    if (data.platform === 'youtube') finalSrc = `https://www.youtube.com/embed/${data.id}?autoplay=1&mute=1&rel=0`;
+                    else if (data.platform === 'twitch') finalSrc = `https://player.twitch.tv/?channel=${data.id}&parent=${domain}&autoplay=true&muted=true`;
+                    else if (data.platform === 'kick') finalSrc = `https://player.kick.com/${data.id}`;
                     document.getElementById('v'+i).src = finalSrc;
+
+                    // Carrega Chat em background (se mudou o ID)
+                    let chatSrc = "";
+                    if (data.platform === 'youtube') chatSrc = `https://www.youtube.com/live_chat?v=${data.id}&embed_domain=${domain}`;
+                    else if (data.platform === 'twitch') chatSrc = `https://www.twitch.tv/embed/${data.id}/chat?parent=${domain}&darkpopout`;
+                    else if (data.platform === 'kick') chatSrc = `https://kick.com/popout/${data.id}/chat`;
+                    
+                    const frame = document.getElementById('f'+i);
+                    if(frame.src !== chatSrc) frame.src = chatSrc;
                 }
             }
         }
 
         function swapChat(n) {
-            const videoId = ids[n-1];
-            const platform = platforms[n-1];
             document.querySelectorAll('.group button').forEach(b => b.classList.remove('active-chat'));
+            document.querySelectorAll('.chat-container').forEach(c => c.classList.remove('chat-active'));
             
-            if(videoId) {
-                let chatSrc = "";
-                if (platform === 'youtube') {
-                    chatSrc = `https://www.youtube.com/live_chat?v=${videoId}&embed_domain=${domain}`;
-                } else if (platform === 'twitch') {
-                    chatSrc = `https://www.twitch.tv/embed/${videoId}/chat?parent=${domain}&darkpopout`;
-                } else if (platform === 'kick') {
-                    // Atualizado para o modo popout que evita o erro "Oops"
-                    chatSrc = `https://kick.com/popout/${videoId}/chat`;
-                }
-                document.getElementById('chat-frame').src = chatSrc;
+            if(ids[n-1]) {
+                document.getElementById('chat-c' + n).classList.add('chat-active');
                 document.getElementById('c' + n).classList.add('active-chat');
                 if(document.getElementById('chat-area').classList.contains('hide')) toggleChat();
             }
@@ -179,6 +172,7 @@
         function apagarSlot(n) {
             document.getElementById('in' + n).value = "";
             document.getElementById('v' + n).src = "";
+            document.getElementById('f' + n).src = "";
             localStorage.removeItem('l' + n);
             ids[n-1] = "";
             platforms[n-1] = "";
