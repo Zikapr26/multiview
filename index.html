@@ -4,43 +4,54 @@
     <meta charset="UTF-8">
     <title>MultiWatch - Zika Edition</title>
     <style>
-        /* Estrutura Base */
-        body { 
-            margin: 0; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            background: #000; 
-            color: white; 
-            display: flex; 
-            flex-direction: column; 
-            height: 100vh; 
-            width: 100vw;
-            overflow: hidden; 
-        }
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #000; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* TOOLBAR (Ilha Vermelha) - Sistema de Empurrar */
+        /* BARRA PRINCIPAL */
         #toolbar { 
-            background: #111; 
-            padding: 8px 15px; 
+            position: relative;
+            background: transparent; 
+            padding: 5px 15px; 
+            display: flex; 
+            gap: 10px; 
+            align-items: flex-start; 
+            z-index: 1000; 
+            height: 50px; 
+            justify-content: space-between;
+            transition: transform 0.3s ease;
+        }
+
+        /* ILHA VERMELHA (CONTROLES) */
+        #menu-to-hide { 
             display: flex; 
             gap: 10px; 
             align-items: center; 
-            border-bottom: 1px solid #333; 
-            z-index: 1000; 
-            height: 40px; 
-            justify-content: space-between;
-            transition: margin-top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            flex-shrink: 0;
-        }
-        
-        /* Classe que faz o menu subir e o vídeo ocupar o topo */
-        .menu-hidden #toolbar { 
-            margin-top: -57px; /* Empurra para cima */
+            background: #111; 
+            padding: 8px 15px;
+            border-radius: 0 0 12px 12px;
+            border: 1px solid #333;
+            border-top: none;
+            transition: transform 0.3s ease;
         }
 
-        #menu-to-hide { display: flex; gap: 10px; align-items: center; }
-        #menu-persistent { display: flex; gap: 10px; align-items: center; }
+        /* Quando o menu está oculto, a ilha vermelha sobe */
+        .menu-hidden #menu-to-hide { 
+            transform: translateY(-45px); /* Ajuste conforme a altura do menu */
+        }
 
-        /* Inputs e Botões */
+        /* ILHA AZUL (CHAT - IMUTÁVEL) */
+        #menu-persistent { 
+            display: flex; 
+            gap: 10px; 
+            align-items: center; 
+            background: #111;
+            padding: 8px 15px;
+            border-radius: 0 0 0 12px;
+            border: 1px solid #333;
+            border-top: none;
+            height: fit-content;
+        }
+
+        /* INPUTS E BOTÕES */
         .input-wrapper { position: relative; display: flex; align-items: center; }
         input { background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 6px 25px 6px 10px; border-radius: 4px; width: 100px; font-size: 11px; outline: none; }
         .clear-btn { position: absolute; right: 5px; cursor: pointer; color: #555; font-size: 14px; font-weight: bold; border: none; background: none; }
@@ -52,67 +63,42 @@
 
         .group { display: flex; align-items: center; gap: 6px; border-left: 1px solid #333; padding-left: 10px; height: 24px; color: #666; font-size: 10px; }
         
-        /* CONTAINER PRINCIPAL */
+        /* ÁREA DE CONTEÚDO (Não muda de tamanho, as ilhas sobrepõem) */
         #main-container { 
             display: flex; 
             flex: 1; 
             width: 100%; 
             overflow: hidden; 
             background: #000; 
-        }
-
-        #content-area { 
-            display: flex; 
-            flex-direction: column; 
-            flex: 1; 
-            position: relative; 
+            position: absolute; 
+            top: 5px; /* Começa do topo para os vídeos subirem */
+            bottom: 0;
+            z-index: 1;
         }
         
-        /* CHAT (Ilha Azul) - Sistema de Empurrar Lateral */
-        #chat-area { 
-            width: 350px; 
-            background: #000; 
-            display: flex; 
-            flex-direction: column; 
-            border-left: 1px solid #222;
-            transition: margin-right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            flex-shrink: 0;
-        }
-
-        /* Classe que faz o chat sumir para a direita e o vídeo expandir */
-        #chat-area.hide { 
-            margin-right: -350px; 
-        }
-
-        /* Vídeos */
+        #content-area { display: flex; flex-direction: column; flex: 1; position: relative; }
         .video-box { position: relative; background: #000; overflow: hidden; display: flex; flex: 1; }
         iframe { width: 100%; height: 100%; border: none; background: #000; display: block; }
 
-        /* Divisores (Gutters) */
         .gutter { background: #000; z-index: 10; transition: background 0.2s; flex-shrink: 0; }
         .gutter:hover { background: #ff0000 !important; }
         .gutter-h { cursor: col-resize; width: 4px; }
         .gutter-v { cursor: row-resize; height: 4px; width: 100%; }
 
+        #chat-area { width: 320px; background: #000; display: flex; flex-direction: column; border-left: 1px solid #222; z-index: 2; }
         .chat-container { flex: 1; width: 100%; height: 100%; display: none; background: #000; }
         .chat-active { display: block !important; }
         
-        /* Gatilho invisível no topo */
-        #menu-trigger { 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 12px; 
-            z-index: 1001; 
-            cursor: pointer; 
-        }
+        .hide { display: none !important; }
+        
+        /* GATILHO PARA MOSTRAR O MENU */
+        #menu-trigger { position: fixed; top: 0; left: 0; width: 70%; height: 15px; z-index: 1001; cursor: pointer; }
     </style>
 </head>
 <body class="menu-hidden"> <div id="menu-trigger" onmouseover="showMenu()"></div>
 
     <div id="toolbar">
-        <div id="menu-to-hide">
+        <div id="menu-to-hide" onmouseleave="hideMenuDelayed()">
             <div class="input-wrapper"><input type="text" id="in1" placeholder="L1"><button class="clear-btn" onclick="apagarSlot(1)">×</button></div>
             <div class="input-wrapper"><input type="text" id="in2" placeholder="L2"><button class="clear-btn" onclick="apagarSlot(2)">×</button></div>
             <div class="input-wrapper"><input type="text" id="in3" placeholder="L3"><button class="clear-btn" onclick="apagarSlot(3)">×</button></div>
@@ -127,12 +113,11 @@
                 <button onclick="mudarLayout('lado')">H</button>
                 <button onclick="mudarLayout('pilha')">V</button>
             </div>
-
-            <button onclick="toggleMenu()" style="background: #333; margin-left: 5px;">MENU</button>
+            <button onclick="toggleMenu()" style="background: #444;">FIXAR</button>
         </div>
 
         <div id="menu-persistent">
-            <button onclick="toggleChat()" id="btn-chat-toggle">CHAT</button>
+            <button onclick="toggleChat()">CHAT</button>
             <div class="group">
                 <span>CHATS:</span>
                 <button onclick="swapChat(1)" id="c1">1</button>
@@ -157,12 +142,11 @@
                 <div id="b4" class="video-box"><iframe id="v4" allowfullscreen></iframe></div>
             </div>
         </div>
-        
         <div id="chat-area" class="hide">
-            <div id="chat-c1" class="chat-container"><iframe id="f1"></iframe></div>
-            <div id="chat-c2" class="chat-container"><iframe id="f2"></iframe></div>
-            <div id="chat-c3" class="chat-container"><iframe id="f3"></iframe></div>
-            <div id="chat-c4" class="chat-container"><iframe id="f4"></iframe></div>
+            <div id="chat-c1" class="chat-container"><iframe id="f1" style="width:100%;height:100%;"></iframe></div>
+            <div id="chat-c2" class="chat-container"><iframe id="f2" style="width:100%;height:100%;"></iframe></div>
+            <div id="chat-c3" class="chat-container"><iframe id="f3" style="width:100%;height:100%;"></iframe></div>
+            <div id="chat-c4" class="chat-container"><iframe id="f4" style="width:100%;height:100%;"></iframe></div>
         </div>
     </div>
 
@@ -217,7 +201,8 @@
                                   (data.platform === 'twitch') ? `https://www.twitch.tv/embed/${data.id}/chat?parent=${domain}&darkpopout` :
                                   `https://kick.com/popout/${data.id}/chat`;
                     document.getElementById('v'+i).src = videoSrc;
-                    document.getElementById('f'+i).src = chatSrc;
+                    const frame = document.getElementById('f'+i);
+                    if(frame.src !== chatSrc) frame.src = chatSrc;
                 } else {
                     ids[i-1] = ""; platforms[i-1] = "";
                     document.getElementById('v'+i).src = "";
@@ -241,13 +226,13 @@
         }
 
         function swapChat(n) {
-            if(!ids[n-1]) return;
             document.querySelectorAll('.group button').forEach(b => b.classList.remove('active-chat'));
             document.querySelectorAll('.chat-container').forEach(c => c.classList.remove('chat-active'));
-            document.getElementById('chat-c' + n).classList.add('chat-active');
-            document.getElementById('c' + n).classList.add('active-chat');
-            // Abre o chat se estiver fechado ao selecionar um número
-            document.getElementById('chat-area').classList.remove('hide');
+            if(ids[n-1]) {
+                document.getElementById('chat-c' + n).classList.add('chat-active');
+                document.getElementById('c' + n).classList.add('active-chat');
+                if(document.getElementById('chat-area').classList.contains('hide')) toggleChat();
+            }
         }
 
         function apagarSlot(n) { document.getElementById('in' + n).value = ""; carregar(); localStorage.removeItem('l' + n); }
@@ -262,25 +247,28 @@
             else if(modo === 'pilha') { rowB.classList.add('hide'); gV.classList.add('hide'); gH1.classList.add('hide'); topR.style.flexDirection = "column"; topR.style.height = "100%"; }
         }
 
-        /* Resizers ajustados para considerar a margem do chat */
         function initResizeH(e) { document.body.classList.add('resizing'); window.addEventListener('mousemove', resH); window.addEventListener('mouseup', stp); }
         function resH(e) { 
-            let chatW = document.getElementById('chat-area').classList.contains('hide') ? 0 : 350; 
+            let chatW = document.getElementById('chat-area').classList.contains('hide') ? 0 : 320; 
             let v = (e.clientX / (window.innerWidth - chatW)) * 100; 
             document.getElementById('b1').style.flex = `0 0 ${v}%`; document.getElementById('b3').style.flex = `0 0 ${v}%`; 
         }
 
-        function initResizeV(e) { window.addEventListener('mousemove', resV); window.addEventListener('mouseup', stp); }
-        function resV(e) { 
-            let menuH = document.body.classList.contains('menu-hidden') ? 0 : 57;
-            let v = ((e.clientY - menuH) / (window.innerHeight - menuH)) * 100; 
-            document.getElementById('top-row').style.height = v + "%"; 
-        }
-        function stp() { window.removeEventListener('mousemove', resH); window.removeEventListener('mousemove', resV); }
+        function initResizeV(e) { document.body.classList.add('resizing'); window.addEventListener('mousemove', resV); window.addEventListener('mouseup', stp); }
+        function resV(e) { let v = (e.clientY / window.innerHeight) * 100; document.getElementById('top-row').style.height = v + "%"; }
+        function stp() { document.body.classList.remove('resizing'); window.removeEventListener('mousemove', resH); window.removeEventListener('mousemove', resV); }
 
-        /* Funções de Visibilidade */
+        /* LOGICA DE MENU ILHA */
         function toggleMenu() { document.body.classList.toggle('menu-hidden'); }
         function showMenu() { document.body.classList.remove('menu-hidden'); }
+        function hideMenuDelayed() { 
+            // Pequeno delay para não fechar na cara se o mouse sair rápido
+            setTimeout(() => {
+                if(!document.body.classList.contains('menu-fixed')) {
+                    // document.body.classList.add('menu-hidden'); 
+                }
+            }, 500);
+        }
         function toggleChat() { document.getElementById('chat-area').classList.toggle('hide'); }
     </script>
 </body>
