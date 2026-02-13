@@ -4,27 +4,15 @@
     <meta charset="UTF-8">
     <title>MultiWatch - Zika Edition</title>
     <style>
+        /* O body como flex column garante que o que estiver visível ocupe o espaço disponível */
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #000; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* Toolbar fixo no fluxo, mas com margem animada */
-        #toolbar { 
-            background: #111; 
-            padding: 8px 15px; 
-            display: flex; 
-            gap: 10px; 
-            align-items: center; 
-            border-bottom: 1px solid #333; 
-            z-index: 1000; 
-            height: 40px; 
-            justify-content: space-between;
-            transition: margin-top 0.3s ease; /* A mágica acontece aqui */
-        }
+        #toolbar { background: #111; padding: 8px 15px; display: flex; gap: 10px; align-items: center; border-bottom: 1px solid #333; z-index: 1000; height: 40px; justify-content: space-between; flex-shrink: 0; }
         
-        /* Quando oculto, ele sobe e 'puxa' o conteúdo de baixo */
-        .menu-hidden { margin-top: -41px !important; }
+        /* Quando a classe .hide é aplicada, o toolbar some e o main-container sobe */
+        .hide { display: none !important; }
 
         #menu-persistent { display: flex; gap: 10px; align-items: center; }
-
         .input-wrapper { position: relative; display: flex; align-items: center; }
         input { background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 6px 25px 6px 10px; border-radius: 4px; width: 100px; font-size: 11px; outline: none; }
         .clear-btn { position: absolute; right: 5px; cursor: pointer; color: #555; font-size: 14px; font-weight: bold; border: none; background: none; }
@@ -36,6 +24,7 @@
 
         .group { display: flex; align-items: center; gap: 6px; border-left: 1px solid #333; padding-left: 10px; height: 24px; color: #666; font-size: 10px; }
         
+        /* O main-container vai sempre ocupar todo o resto da tela */
         #main-container { display: flex; flex: 1; width: 100%; overflow: hidden; background: #000; }
         #content-area { display: flex; flex-direction: column; flex: 1; position: relative; }
         
@@ -51,7 +40,6 @@
         .chat-container { flex: 1; width: 100%; height: 100%; display: none; background: #000; }
         .chat-active { display: block !important; }
         
-        .hide { display: none !important; }
         #menu-trigger { position: fixed; top: 0; left: 0; width: 100%; height: 12px; z-index: 1001; cursor: pointer; }
     </style>
 </head>
@@ -114,6 +102,7 @@
     </div>
 
     <script>
+        // ... (resto do script igual ao original para não quebrar as funções)
         let ids = ["", "", "", ""];
         let platforms = ["", "", "", ""];
         const domain = window.location.hostname || "localhost";
@@ -221,8 +210,9 @@
         function resV(e) { let v = (e.clientY / window.innerHeight) * 100; document.getElementById('top-row').style.height = v + "%"; }
         function stp() { window.removeEventListener('mousemove', resH); window.removeEventListener('mousemove', resV); }
 
-        function toggleMenu() { document.getElementById('toolbar').classList.toggle('menu-hidden'); }
-        function showMenu() { document.getElementById('toolbar').classList.remove('menu-hidden'); }
+        // Funções corrigidas para dar display none no toolbar
+        function toggleMenu() { document.getElementById('toolbar').classList.toggle('hide'); }
+        function showMenu() { document.getElementById('toolbar').classList.remove('hide'); }
         function toggleChat() { document.getElementById('chat-area').classList.toggle('hide'); }
     </script>
 </body>
