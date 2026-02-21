@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>MultiWatch - Expedição Helios (GitHub Fixed)</title>
+    <title>MultiWatch - Expedição Helios (FORCE LIVE)</title>
     <style>
         body { margin: 0; font-family: sans-serif; background: #000; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         #toolbar { position: fixed; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; z-index: 1000; pointer-events: none; height: 50px; }
@@ -12,8 +12,7 @@
         .group-inputs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
         input { background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 4px; border-radius: 4px; width: 95px; font-size: 10px; outline: none; }
         button { background: #222; color: #eee; border: 1px solid #444; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold; }
-        .btn-sync { background: #0055ff; border: none; color: white; }
-        .btn-red { background: #ff0000; border: none; color: white; }
+        .btn-sync { background: #ffaa00; border: none; color: #000; } /* Cor de destaque para forçar */
         #main-container { display: flex; flex: 1; width: 100%; overflow: hidden; margin-top: 50px; transition: margin-top 0.3s ease; }
         .menu-hidden #main-container { margin-top: 0 !important; }
         #content-area { display: flex; flex-direction: column; flex: 1; }
@@ -35,21 +34,21 @@
 
     <div id="toolbar">
         <div id="menu-to-hide" onmouseleave="startHideTimer()" onmouseenter="clearHideTimer()">
-            <button class="btn-sync" onclick="syncYoutube()">SYNC HELIOS</button>
+            <button class="btn-sync" onclick="forceSync()">FORÇAR LIVES AGORA</button>
             <div class="group-inputs">
                 <input type="text" id="in1" placeholder="L1"><input type="text" id="in2" placeholder="L2"><input type="text" id="in3" placeholder="L3">
                 <input type="text" id="in4" placeholder="L4"><input type="text" id="in5" placeholder="L5"><input type="text" id="in6" placeholder="L6">
             </div>
-            <button class="btn-red" onclick="carregar()">OK</button>
-            <button onclick="setLayout(6)">G6</button>
+            <button onclick="carregarManual()" style="background:#ff0000; border:none;">OK</button>
+            <button onclick="setLayout(6)">GRADE 6</button>
             <button id="btnFocus" onclick="toggleFocus()">FOCUS</button>
         </div>
 
         <div id="menu-persistent">
             <button onclick="toggleChat()">CHAT</button>
             <select id="chatSelect" onchange="swapChat(this.value)" style="background:#222; color:white; font-size:10px;">
-                <option value="1">Chat 1</option><option value="2">Chat 2</option><option value="3">Chat 3</option>
-                <option value="4">Chat 4</option><option value="5">Chat 5</option><option value="6">Chat 6</option>
+                <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                <option value="4">4</option><option value="5">5</option><option value="6">6</option>
             </select>
         </div>
     </div>
@@ -79,7 +78,6 @@
     </div>
 
     <script>
-        const API_KEY = "AIzaSyCQq0x3oD1kOWt2ZNgIhD-Y75nxIK3Z2gI";
         const CANAIS = [
             "UC-lHJZR3Gqxm24_Vd_AJ5Yw", // Richard
             "UC0uYV778E2GTo6W8U6u220w", // Rato Borrachudo
@@ -91,46 +89,27 @@
 
         const domain = "zikapr26.github.io"; 
 
-        async function syncYoutube() {
-            const btn = document.querySelector('.btn-sync');
-            btn.innerText = "SINCRO...";
-            let encontrados = 0;
-            
-            for(let i=1; i<=6; i++) document.getElementById('in'+i).value = "";
-
-            for (let i = 0; i < CANAIS.length; i++) {
-                try {
-                    // Busca específica por transmissões ativas via API
-                    let r = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CANAIS[i]}&type=video&eventType=live&key=${API_KEY}`);
-                    let d = await r.json();
-                    
-                    if (d.items && d.items.length > 0) {
-                        encontrados++;
-                        const videoId = d.items[0].id.videoId;
-                        document.getElementById('in' + encontrados).value = `https://www.youtube.com/watch?v=${videoId}`;
-                    }
-                } catch (e) { console.error("Erro na API"); }
+        // Sincronização por Link Direto de Live (Pula a API de busca)
+        function forceSync() {
+            for(let i=0; i<CANAIS.length; i++) {
+                const num = i + 1;
+                // Carrega o redirecionador de live direta do canal
+                document.getElementById('v' + num).src = `https://www.youtube.com/embed/live_stream?channel=${CANAIS[i]}&autoplay=1&mute=1`;
+                // Tenta carregar o chat padrão do canal
+                document.getElementById('f' + num).src = `https://www.youtube.com/live_chat?v=default&embed_domain=${domain}`;
+                document.getElementById('b' + num).classList.remove('hide');
             }
-            if(encontrados > 0) carregar();
-            else alert("Canais da expedição estão offline agora.");
-            btn.innerText = "SYNC HELIOS";
+            setLayout(6);
         }
 
-        function carregar() {
+        function carregarManual() {
             for(let i=1; i<=6; i++) {
                 const val = document.getElementById('in'+i).value;
-                const box = document.getElementById('b'+i);
-                const frame = document.getElementById('v'+i);
-                
                 if(val && val.includes("v=")) {
                     const id = val.split("v=")[1].split("&")[0];
-                    box.classList.remove('hide');
-                    // URL de embed focada no ID do vídeo para evitar redirecionamento à home
-                    frame.src = `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&enablejsapi=1`;
+                    document.getElementById('v'+i).src = `https://www.youtube.com/embed/${id}?autoplay=1&mute=1`;
                     document.getElementById('f'+i).src = `https://www.youtube.com/live_chat?v=${id}&embed_domain=${domain}`;
-                } else {
-                    box.classList.add('hide');
-                    frame.src = "";
+                    document.getElementById('b'+i).classList.remove('hide');
                 }
             }
             setLayout(6);
@@ -146,22 +125,9 @@
 
         function toggleFocus() {
             document.body.classList.toggle('focus-mode');
-            const btn = document.getElementById('btnFocus');
-            if (document.body.classList.contains('focus-mode')) {
-                btn.innerText = "SAIR";
-                document.body.classList.add('menu-hidden');
-            } else {
-                btn.innerText = "FOCUS";
-                showMenu();
-            }
+            if (document.body.classList.contains('focus-mode')) document.body.classList.add('menu-hidden');
+            else showMenu();
         }
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === "Escape") {
-                if (document.body.classList.contains('focus-mode')) toggleFocus();
-                else document.body.classList.add('menu-hidden');
-            }
-        });
 
         function showMenu() { document.body.classList.remove('menu-hidden'); }
         function startHideTimer() { hideTimer = setTimeout(() => document.body.classList.add('menu-hidden'), 2500); }
@@ -175,7 +141,7 @@
         function initResizeChat(e) { window.addEventListener('mousemove', resChat); window.addEventListener('mouseup', () => window.removeEventListener('mousemove', resChat)); }
         function resChat(e) {
             let v = window.innerWidth - e.clientX;
-            if(v > 150 && v < 600) { document.getElementById('chat-area').style.width = v + "px"; localStorage.setItem('chatWidth', v); }
+            if(v > 150 && v < 600) document.getElementById('chat-area').style.width = v + "px";
         }
     </script>
 </body>
