@@ -1,87 +1,191 @@
-<script>
-    const API_KEY = "AIzaSyCQq0x3oD1kOWt2ZNgIhD-Y75nxIK3Z2gI";
-    
-    // Lista oficial da Expedição baseada nos links enviados
-    const CANAIS_MONITORADOS = [
-        "UC-lHJZR3Gqxm24_Vd_AJ5Yw", // Richard Rasmussen
-        "UC0uYV778E2GTo6W8U6u220w", // Rato Borrachudo
-        "UCPY9OndS0GqL9YofV_8B9_w", // Renato Cariani
-        "UCxI-mD7-S1vshLh9LpX8Oog", // ACF Performance
-        "UCX9H70qU1R3eK3c9NnOasTg", // Tonimek
-        "UC57f9p_v0m3Gq80M09Hl_Bg"  // Gordox
-    ];
-
-    async function syncYoutube() {
-        const btn = document.querySelector('.btn-sync');
-        btn.innerText = "BUSCANDO LIVES...";
-        btn.style.background = "#ffaa00";
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>MultiWatch - Expedição Helios</title>
+    <style>
+        body { margin: 0; font-family: sans-serif; background: #000; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        // Limpa os campos antes da nova busca
-        for(let i=1; i<=6; i++) document.getElementById('in'+i).value = "";
+        /* TOOLBAR */
+        #toolbar { position: fixed; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; z-index: 1000; pointer-events: none; height: 50px; }
+        #menu-to-hide { background: #111; padding: 5px 15px; display: flex; gap: 8px; align-items: center; border: 1px solid #333; border-top: none; pointer-events: auto; transition: transform 0.3s ease; }
+        .menu-hidden #menu-to-hide { transform: translateY(-100%); }
+        #menu-persistent { background: #111; padding: 5px 15px; display: flex; gap: 10px; align-items: center; border: 1px solid #333; border-top: none; pointer-events: auto; }
+        
+        /* INPUTS */
+        .group-inputs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+        input { background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 4px; border-radius: 4px; width: 90px; font-size: 10px; outline: none; }
+        
+        /* BOTÕES */
+        button { background: #222; color: #eee; border: 1px solid #444; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold; }
+        button:hover { background: #333; }
+        .btn-sync { background: #0055ff; border: none; color: white; }
+        .btn-red { background: #ff0000; border: none; }
 
-        let encontradas = 0;
+        /* CONTAINERS */
+        #main-container { display: flex; flex: 1; width: 100%; overflow: hidden; margin-top: 50px; transition: margin-top 0.3s ease; }
+        .menu-hidden #main-container { margin-top: 0; }
+        #content-area { display: flex; flex-direction: column; flex: 1; }
+        .row { display: flex; flex: 1; min-height: 0; }
+        .video-box { flex: 1; background: #000; border: 1px solid #111; position: relative; display: flex; }
+        iframe { width: 100%; height: 100%; border: none; }
 
-        for (const channelId of CANAIS_MONITORADOS) {
-            try {
-                // Busca se o canal está em live agora
-                const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&type=video&eventType=live&key=${API_KEY}`;
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                if (data.items && data.items.length > 0 && encontradas < 6) {
-                    encontradas++;
-                    const videoId = data.items[0].id.videoId;
-                    document.getElementById('in' + encontradas).value = `https://www.youtube.com/watch?v=${videoId}`;
-                }
-            } catch (e) { 
-                console.error("Erro na API para o canal: " + channelId); 
+        /* CHAT */
+        #chat-area { width: 320px; min-width: 150px; background: #000; border-left: 1px solid #222; display: flex; flex-direction: column; }
+        .chat-container { flex: 1; display: none; }
+        .chat-active { display: block !important; }
+        .hide { display: none !important; }
+        
+        #menu-trigger { position: fixed; top: 0; left: 0; width: 100%; height: 15px; z-index: 1001; }
+        #gutter-chat { cursor: col-resize; width: 4px; background: #222; z-index: 10; }
+        
+        .focus-mode #menu-persistent, .focus-mode #menu-to-hide { display: none; }
+    </style>
+</head>
+<body class="menu-hidden">
+
+    <div id="menu-trigger" onmouseenter="showMenu()"></div>
+
+    <div id="toolbar">
+        <div id="menu-to-hide" onmouseleave="startHideTimer()" onmouseenter="clearHideTimer()">
+            <button class="btn-sync" onclick="syncYoutube()">SYNC HELIOS</button>
+            <div class="group-inputs">
+                <input type="text" id="in1" placeholder="L1"><input type="text" id="in2" placeholder="L2"><input type="text" id="in3" placeholder="L3">
+                <input type="text" id="in4" placeholder="L4"><input type="text" id="in5" placeholder="L5"><input type="text" id="in6" placeholder="L6">
+            </div>
+            <button class="btn-red" onclick="carregar()">OK</button>
+            <button onclick="setLayout(6)">G6</button>
+            <button onclick="setLayout(4)">G4</button>
+            <button onclick="setLayout(3)">L3</button>
+            <button onclick="toggleFocus()">FOCUS</button>
+        </div>
+
+        <div id="menu-persistent">
+            <button onclick="toggleChat()">CHAT</button>
+            <select id="chatSelect" onchange="swapChat(this.value)" style="background:#222; color:white; font-size:10px;">
+                <option value="1">Chat 1</option><option value="2">Chat 2</option><option value="3">Chat 3</option>
+                <option value="4">Chat 4</option><option value="5">Chat 5</option><option value="6">Chat 6</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="main-container">
+        <div id="content-area">
+            <div id="row-up" class="row">
+                <div id="b1" class="video-box"><iframe id="v1"></iframe></div>
+                <div id="b2" class="video-box"><iframe id="v2"></iframe></div>
+                <div id="b3" class="video-box"><iframe id="v3"></iframe></div>
+            </div>
+            <div id="row-down" class="row">
+                <div id="b4" class="video-box"><iframe id="v4"></iframe></div>
+                <div id="b5" class="video-box"><iframe id="v5"></iframe></div>
+                <div id="b6" class="video-box"><iframe id="v6"></iframe></div>
+            </div>
+        </div>
+        <div id="gutter-chat" class="gutter hide" onmousedown="initResizeChat(event)"></div>
+        <div id="chat-area" class="hide">
+            <div id="chat-c1" class="chat-container"><iframe id="f1"></iframe></div>
+            <div id="chat-c2" class="chat-container"><iframe id="f2"></iframe></div>
+            <div id="chat-c3" class="chat-container"><iframe id="f3"></iframe></div>
+            <div id="chat-c4" class="chat-container"><iframe id="f4"></iframe></div>
+            <div id="chat-c5" class="chat-container"><iframe id="f5"></iframe></div>
+            <div id="chat-c6" class="chat-container"><iframe id="f6"></iframe></div>
+        </div>
+    </div>
+
+    <script>
+        const API_KEY = "AIzaSyCQq0x3oD1kOWt2ZNgIhD-Y75nxIK3Z2gI";
+        const CANAIS = [
+            "UC-lHJZR3Gqxm24_Vd_AJ5Yw", // Richard Rasmussen
+            "UC0uYV778E2GTo6W8U6u220w", // Rato Borrachudo
+            "UCPY9OndS0GqL9YofV_8B9_w", // Renato Cariani
+            "UCxI-mD7-S1vshLh9LpX8Oog", // ACF Performance
+            "UCX9H70qU1R3eK3c9NnOasTg", // Tonimek
+            "UC57f9p_v0m3Gq80M09Hl_Bg"  // Gordox
+        ];
+
+        let hideTimer;
+        const domain = window.location.hostname || "localhost";
+
+        window.onload = () => {
+            const savedChatW = localStorage.getItem('chatWidth');
+            if(savedChatW) document.getElementById('chat-area').style.width = savedChatW + "px";
+            carregar();
+        };
+
+        async function syncYoutube() {
+            const btn = document.querySelector('.btn-sync');
+            btn.innerText = "BUSCANDO...";
+            let encontrados = 0;
+            
+            for (let i = 0; i < CANAIS.length; i++) {
+                try {
+                    const r = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CANAIS[i]}&type=video&eventType=live&key=${API_KEY}`);
+                    const d = await r.json();
+                    if (d.items?.length > 0) {
+                        encontrados++;
+                        document.getElementById('in' + encontrados).value = `https://www.youtube.com/watch?v=${d.items[0].id.videoId}`;
+                    }
+                } catch (e) { console.error(e); }
             }
+            if(encontrados > 0) carregar();
+            else alert("Nenhuma live online agora.");
+            btn.innerText = "SYNC HELIOS";
         }
 
-        if (encontradas > 0) {
-            carregar(); // Atualiza os iframes
-            alert(encontradas + " lives encontradas e carregadas!");
-        } else {
-            alert("Nenhum desses canais está em live no momento.");
-        }
-        
-        btn.innerText = "SYNC HELIOS";
-        btn.style.background = "#0055ff";
-    }
-
-    // Ajuste no Layout para o modo 3 (2 em cima, 1 embaixo centralizado)
-    function setLayout(n) {
-        const rowUp = document.getElementById('row-up');
-        const rowDown = document.getElementById('row-down');
-        const allBoxes = document.querySelectorAll('.video-box');
-        
-        // Reset inicial: esconde tudo
-        allBoxes.forEach(box => box.classList.add('hide'));
-        rowUp.style.display = "flex";
-        rowDown.style.display = "flex";
-
-        if(n === 6) {
-            // Mostra todos que tiverem link
+        function carregar() {
             for(let i=1; i<=6; i++) {
-                if(document.getElementById('in'+i).value) {
-                    document.getElementById('b'+i).classList.remove('hide');
-                    document.getElementById('b'+i).style.flex = "1";
+                const val = document.getElementById('in'+i).value;
+                const box = document.getElementById('b'+i);
+                if(val.includes("v=")) {
+                    const id = val.split("v=")[1].split("&")[0];
+                    box.classList.remove('hide');
+                    document.getElementById('v'+i).src = `https://www.youtube.com/embed/${id}?autoplay=1&mute=1`;
+                    document.getElementById('f'+i).src = `https://www.youtube.com/live_chat?v=${id}&embed_domain=${domain}`;
+                } else {
+                    box.classList.add('hide');
+                    document.getElementById('v'+i).src = "";
                 }
             }
-        } 
-        else if(n === 3) {
-            // 2 em cima, 1 embaixo
-            document.getElementById('b1').classList.remove('hide');
-            document.getElementById('b2').classList.remove('hide');
-            document.getElementById('b4').classList.remove('hide');
-            document.getElementById('b4').style.flex = "2"; // Ocupa mais espaço embaixo
+            setLayout(6);
         }
-        else if(n === 4) {
-            // Grade clássica 2x2
-            document.getElementById('b1').classList.remove('hide');
-            document.getElementById('b2').classList.remove('hide');
-            document.getElementById('b4').classList.remove('hide');
-            document.getElementById('b5').classList.remove('hide');
+
+        function setLayout(n) {
+            const rowUp = document.getElementById('row-up');
+            const rowDown = document.getElementById('row-down');
+            const boxes = document.querySelectorAll('.video-box');
+            
+            boxes.forEach(b => { b.classList.add('hide'); b.style.flex = "1"; });
+            rowUp.style.display = "flex";
+            rowDown.style.display = "flex";
+
+            if(n === 6) {
+                for(let i=1; i<=6; i++) if(document.getElementById('in'+i).value) document.getElementById('b'+i).classList.remove('hide');
+            } else if(n === 4) {
+                [1,2,4,5].forEach(i => document.getElementById('b'+i).classList.remove('hide'));
+            } else if(n === 3) {
+                [1,2,4].forEach(i => document.getElementById('b'+i).classList.remove('hide'));
+                document.getElementById('b4').style.flex = "2";
+            }
         }
-    }
-</script>
+
+        function showMenu() { document.body.classList.remove('menu-hidden'); clearHideTimer(); }
+        function startHideTimer() { hideTimer = setTimeout(() => document.body.classList.add('menu-hidden'), 2500); }
+        function clearHideTimer() { if (hideTimer) clearTimeout(hideTimer); }
+        function toggleChat() { document.getElementById('chat-area').classList.toggle('hide'); document.getElementById('gutter-chat').classList.toggle('hide'); }
+        function toggleFocus() { document.body.classList.toggle('focus-mode'); }
+        
+        function swapChat(n) {
+            document.querySelectorAll('.chat-container').forEach(c => c.classList.remove('chat-active'));
+            document.getElementById('chat-c' + n).classList.add('chat-active');
+            if(document.getElementById('chat-area').classList.contains('hide')) toggleChat();
+        }
+
+        function initResizeChat(e) { window.addEventListener('mousemove', resChat); window.addEventListener('mouseup', () => window.removeEventListener('mousemove', resChat)); }
+        function resChat(e) {
+            let v = window.innerWidth - e.clientX;
+            if(v > 150 && v < 600) { document.getElementById('chat-area').style.width = v + "px"; localStorage.setItem('chatWidth', v); }
+        }
+    </script>
+</body>
+</html>
