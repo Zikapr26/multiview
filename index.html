@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>MultiWatch - Expedição Helios (Pro Layout)</title>
+    <title>MultiWatch - Expedição Helios (V3 PRO)</title>
     <style>
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #000; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
@@ -18,20 +18,13 @@
         #main-container { display: flex; flex: 1; width: 100%; overflow: hidden; margin-top: 50px; transition: margin-top 0.3s ease; }
         .menu-hidden #main-container { margin-top: 0; }
         
-        /* GRID DINÂMICA SIMILAR AO SITE DA EXPEDIÇÃO */
-        #content-area { 
-            display: grid; 
-            flex: 1; 
-            gap: 2px; 
-            background: #111;
-            transition: all 0.3s ease;
-        }
+        #content-area { display: grid; flex: 1; gap: 2px; background: #111; transition: all 0.3s ease; }
 
-        /* Classes de Layout */
+        /* Classes de Layout baseadas na Expedição */
         .layout-6 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); }
         .layout-4 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); }
         .layout-3 { grid-template-columns: repeat(2, 1fr); grid-template-rows: 1fr 1fr; }
-        .layout-3 .video-box:nth-child(3) { grid-column: span 2; } /* O terceiro vídeo fica grande embaixo */
+        .layout-3 .video-box:nth-child(3) { grid-column: span 2; }
 
         .video-box { background: #000; position: relative; width: 100%; height: 100%; overflow: hidden; }
         iframe { width: 100%; height: 100%; border: none; background: #000; }
@@ -59,12 +52,12 @@
 
     <div id="main-container">
         <div id="content-area" class="layout-6">
-            <div id="b1" class="video-box"><div class="name-tag">RICHARD</div><iframe id="v1" allowfullscreen></iframe></div>
-            <div id="b2" class="video-box"><div class="name-tag">RATO B.</div><iframe id="v2" allowfullscreen></iframe></div>
-            <div id="b3" class="video-box"><div class="name-tag">CARIANI</div><iframe id="v3" allowfullscreen></iframe></div>
-            <div id="b4" class="video-box"><div class="name-tag">ACF</div><iframe id="v4" allowfullscreen></iframe></div>
-            <div id="b5" class="video-box"><div class="name-tag">TONIMEK</div><iframe id="v5" allowfullscreen></iframe></div>
-            <div id="b6" class="video-box"><div class="name-tag">GORDOX</div><iframe id="v6" allowfullscreen></iframe></div>
+            <div id="b1" class="video-box"><div class="name-tag">RICHARD</div><iframe id="v1" allowfullscreen allow="autoplay; encrypted-media"></iframe></div>
+            <div id="b2" class="video-box"><div class="name-tag">RATO B.</div><iframe id="v2" allowfullscreen allow="autoplay; encrypted-media"></iframe></div>
+            <div id="b3" class="video-box"><div class="name-tag">CARIANI</div><iframe id="v3" allowfullscreen allow="autoplay; encrypted-media"></iframe></div>
+            <div id="b4" class="video-box"><div class="name-tag">ACF</div><iframe id="v4" allowfullscreen allow="autoplay; encrypted-media"></iframe></div>
+            <div id="b5" class="video-box"><div class="name-tag">TONIMEK</div><iframe id="v5" allowfullscreen allow="autoplay; encrypted-media"></iframe></div>
+            <div id="b6" class="video-box"><div class="name-tag">GORDOX</div><iframe id="v6" allowfullscreen allow="autoplay; encrypted-media"></iframe></div>
         </div>
     </div>
 
@@ -79,7 +72,7 @@
             { id: "UC57f9p_v0m3Gq80M09Hl_Bg", name: "Gordox" }
         ];
 
-        const domain = "zikapr26.github.io";
+        const domain = "zikapr26.github.io"; // Domínio autorizado
 
         async function atualizarTudo() {
             const btn = document.querySelector('.btn-live');
@@ -88,17 +81,19 @@
             for (let i = 0; i < CANAIS.length; i++) {
                 const iframe = document.getElementById('v' + (i + 1));
                 try {
-                    // Busca ID da live
+                    // Busca ID real do vídeo da live atual
                     const r = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CANAIS[i].id}&type=video&eventType=live&key=${API_KEY}`);
                     const data = await r.json();
                     
                     if (data.items && data.items.length > 0) {
-                        iframe.src = `https://www.youtube.com/embed/${data.items[0].id.videoId}?autoplay=1&mute=1&rel=0`;
+                        const videoId = data.items[0].id.videoId;
+                        // Link de embed direto com origin autorizado
+                        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&rel=0&origin=https://${domain}`;
                     } else {
-                        // Backup: Live direta
-                        iframe.src = `https://www.youtube.com/embed/live_stream?channel=${CANAIS[i].id}&autoplay=1&mute=1`;
+                        // Backup via link de stream direta do canal
+                        iframe.src = `https://www.youtube.com/embed/live_stream?channel=${CANAIS[i].id}&autoplay=1&mute=1&origin=https://${domain}`;
                     }
-                } catch (e) { console.error(e); }
+                } catch (e) { console.error("Erro no canal " + CANAIS[i].name); }
             }
             btn.innerText = "SINCRO AO VIVO";
         }
@@ -106,12 +101,9 @@
         function mudarLayout(classe) {
             const area = document.getElementById('content-area');
             const boxes = document.querySelectorAll('.video-box');
-            
-            // Remove layouts anteriores
             area.classList.remove('layout-6', 'layout-4', 'layout-3');
             area.classList.add(classe);
 
-            // Se for Layout 3 ou 4, esconde os vídeos excedentes
             boxes.forEach((box, index) => {
                 box.classList.remove('hide');
                 if(classe === 'layout-4' && index >= 4) box.classList.add('hide');
