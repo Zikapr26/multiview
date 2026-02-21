@@ -63,14 +63,14 @@
     <div id="main-container">
         <div id="content-area">
             <div id="row-up" class="row">
-                <div id="b1" class="video-box"><iframe id="v1"></iframe></div>
-                <div id="b2" class="video-box"><iframe id="v2"></iframe></div>
-                <div id="b3" class="video-box"><iframe id="v3"></iframe></div>
+                <div id="b1" class="video-box"><iframe id="v1" allowfullscreen></iframe></div>
+                <div id="b2" class="video-box"><iframe id="v2" allowfullscreen></iframe></div>
+                <div id="b3" class="video-box"><iframe id="v3" allowfullscreen></iframe></div>
             </div>
             <div id="row-down" class="row">
-                <div id="b4" class="video-box"><iframe id="v4"></iframe></div>
-                <div id="b5" class="video-box"><iframe id="v5"></iframe></div>
-                <div id="b6" class="video-box"><iframe id="v6"></iframe></div>
+                <div id="b4" class="video-box"><iframe id="v4" allowfullscreen></iframe></div>
+                <div id="b5" class="video-box"><iframe id="v5" allowfullscreen></iframe></div>
+                <div id="b6" class="video-box"><iframe id="v6" allowfullscreen></iframe></div>
             </div>
         </div>
         <div id="gutter-chat" class="gutter hide" onmousedown="initResizeChat(event)"></div>
@@ -97,17 +97,15 @@
 
         let domain = window.location.hostname || "localhost";
 
-        // MÉTODO INFALÍVEL: Tenta carregar a live atual do canal sem usar busca da API
         function forceLive() {
             for(let i=0; i<CANAIS.length; i++) {
                 const box = document.getElementById('b'+(i+1));
                 const frame = document.getElementById('v'+(i+1));
                 box.classList.remove('hide');
-                // O YouTube redireciona automaticamente para a live ativa com esse link
-                frame.src = `https://www.youtube.com/embed/live_stream?channel=${CANAIS[i]}&autoplay=1&mute=1`;
+                // Link direto de redirecionamento de live do canal
+                frame.src = `https://www.youtube.com/embed/live_stream?channel=${CANAIS[i]}&autoplay=1&mute=1&origin=http://${domain}`;
             }
             setLayout(6);
-            alert("Tentando sintonizar as lives dos 6 canais...");
         }
 
         async function syncYoutube() {
@@ -127,7 +125,7 @@
                 } catch (e) { console.log("Erro API"); }
             }
             if(encontrados > 0) carregar();
-            else alert("Nenhuma live 'oficial' encontrada. Tente o botão FORÇAR LIVE.");
+            else alert("Nenhuma live encontrada via API.");
             btn.innerText = "SYNC API";
         }
 
@@ -139,7 +137,7 @@
                 if(val.includes("v=")) {
                     const id = val.split("v=")[1].split("&")[0];
                     box.classList.remove('hide');
-                    frame.src = `https://www.youtube.com/embed/${id}?autoplay=1&mute=1`;
+                    frame.src = `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&origin=http://${domain}`;
                     document.getElementById('f'+i).src = `https://www.youtube.com/live_chat?v=${id}&embed_domain=${domain}`;
                 } else {
                     box.classList.add('hide');
