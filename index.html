@@ -2,29 +2,34 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>MultiWatch - Expedição Helios (ULTIMATE FIX)</title>
+    <title>MultiWatch - Expedição Helios (GitHub Edition)</title>
     <style>
         body { margin: 0; font-family: sans-serif; background: #000; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        #toolbar { position: fixed; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; z-index: 1000; pointer-events: none; height: 55px; }
+        
+        #toolbar { position: fixed; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; z-index: 1000; pointer-events: none; height: 50px; }
         #menu-to-hide { background: #111; padding: 5px 15px; display: flex; gap: 8px; align-items: center; border: 1px solid #333; border-top: none; pointer-events: auto; transition: transform 0.3s ease; }
         .menu-hidden #menu-to-hide { transform: translateY(-100%); }
         #menu-persistent { background: #111; padding: 5px 15px; display: flex; gap: 10px; align-items: center; border: 1px solid #333; border-top: none; pointer-events: auto; }
+        
         .group-inputs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
-        input { background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 4px; border-radius: 4px; width: 90px; font-size: 10px; outline: none; }
+        input { background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 4px; border-radius: 4px; width: 95px; font-size: 10px; outline: none; }
+        
         button { background: #222; color: #eee; border: 1px solid #444; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold; }
         .btn-sync { background: #0055ff; border: none; color: white; }
-        .btn-force { background: #ffaa00; border: none; color: #000; }
-        #main-container { display: flex; flex: 1; width: 100%; overflow: hidden; margin-top: 55px; transition: margin-top 0.3s ease; }
+        .btn-red { background: #ff0000; border: none; color: white; }
+
+        #main-container { display: flex; flex: 1; width: 100%; overflow: hidden; margin-top: 50px; transition: margin-top 0.3s ease; }
         .menu-hidden #main-container { margin-top: 0 !important; }
         #content-area { display: flex; flex-direction: column; flex: 1; }
         .row { display: flex; flex: 1; min-height: 0; }
-        .video-box { flex: 1; background: #000; border: 1px solid #111; position: relative; display: flex; }
-        iframe { width: 100%; height: 100%; border: none; background: #000; }
-        .btn-link-externo { position: absolute; bottom: 5px; right: 5px; background: rgba(0,0,0,0.7); color: #fff; padding: 2px 5px; font-size: 9px; text-decoration: none; border-radius: 3px; z-index: 5; border: 1px solid #555; }
+        .video-box { flex: 1; background: #000; border: 1px solid #222; position: relative; }
+        iframe { width: 100%; height: 100%; border: none; }
+
         #chat-area { width: 320px; min-width: 150px; background: #000; border-left: 1px solid #222; display: flex; flex-direction: column; }
         .chat-container { flex: 1; display: none; }
         .chat-active { display: block !important; }
         .hide { display: none !important; }
+        
         #menu-trigger { position: fixed; top: 0; left: 0; width: 100%; height: 15px; z-index: 1001; pointer-events: auto; }
         #gutter-chat { cursor: col-resize; width: 4px; background: #222; z-index: 10; }
         .focus-mode #menu-persistent { display: none; }
@@ -36,15 +41,12 @@
 
     <div id="toolbar">
         <div id="menu-to-hide" onmouseleave="startHideTimer()" onmouseenter="clearHideTimer()">
-            <div style="display:flex; flex-direction:column; gap:2px;">
-                <button class="btn-sync" onclick="syncYoutube()">SYNC API</button>
-                <button class="btn-force" onclick="forceLive()">FORÇAR LIVE</button>
-            </div>
+            <button class="btn-sync" onclick="syncCanais()">SINCRO EXPEDIÇÃO</button>
             <div class="group-inputs">
-                <input type="text" id="in1" placeholder="L1"><input type="text" id="in2" placeholder="L2"><input type="text" id="in3" placeholder="L3">
-                <input type="text" id="in4" placeholder="L4"><input type="text" id="in5" placeholder="L5"><input type="text" id="in6" placeholder="L6">
+                <input type="text" id="in1" placeholder="Slot 1"><input type="text" id="in2" placeholder="Slot 2"><input type="text" id="in3" placeholder="Slot 3">
+                <input type="text" id="in4" placeholder="Slot 4"><input type="text" id="in5" placeholder="Slot 5"><input type="text" id="in6" placeholder="Slot 6">
             </div>
-            <button onclick="carregar()" style="background:#ff0000; border:none;">OK</button>
+            <button class="btn-red" onclick="carregarManual()">OK</button>
             <button onclick="setLayout(6)">G6</button>
             <button id="btnFocus" onclick="toggleFocus()">FOCUS</button>
         </div>
@@ -61,14 +63,14 @@
     <div id="main-container">
         <div id="content-area">
             <div id="row-up" class="row">
-                <div id="b1" class="video-box"><iframe id="v1" allow="autoplay; encrypted-media" allowfullscreen></iframe><a id="l1" class="btn-link-externo" target="_blank">YT</a></div>
-                <div id="b2" class="video-box"><iframe id="v2" allow="autoplay; encrypted-media" allowfullscreen></iframe><a id="l2" class="btn-link-externo" target="_blank">YT</a></div>
-                <div id="b3" class="video-box"><iframe id="v3" allow="autoplay; encrypted-media" allowfullscreen></iframe><a id="l3" class="btn-link-externo" target="_blank">YT</a></div>
+                <div id="b1" class="video-box"><iframe id="v1" allow="autoplay; fullscreen"></iframe></div>
+                <div id="b2" class="video-box"><iframe id="v2" allow="autoplay; fullscreen"></iframe></div>
+                <div id="b3" class="video-box"><iframe id="v3" allow="autoplay; fullscreen"></iframe></div>
             </div>
             <div id="row-down" class="row">
-                <div id="b4" class="video-box"><iframe id="v4" allow="autoplay; encrypted-media" allowfullscreen></iframe><a id="l4" class="btn-link-externo" target="_blank">YT</a></div>
-                <div id="b5" class="video-box"><iframe id="v5" allow="autoplay; encrypted-media" allowfullscreen></iframe><a id="l5" class="btn-link-externo" target="_blank">YT</a></div>
-                <div id="b6" class="video-box"><iframe id="v6" allow="autoplay; encrypted-media" allowfullscreen></iframe><a id="l6" class="btn-link-externo" target="_blank">YT</a></div>
+                <div id="b4" class="video-box"><iframe id="v4" allow="autoplay; fullscreen"></iframe></div>
+                <div id="b5" class="video-box"><iframe id="v5" allow="autoplay; fullscreen"></iframe></div>
+                <div id="b6" class="video-box"><iframe id="v6" allow="autoplay; fullscreen"></iframe></div>
             </div>
         </div>
         <div id="gutter-chat" class="gutter hide" onmousedown="initResizeChat(event)"></div>
@@ -83,93 +85,73 @@
     </div>
 
     <script>
-        const API_KEY = "AIzaSyCQq0x3oD1kOWt2ZNgIhD-Y75nxIK3Z2gI";
+        // IDs Reais dos Canais da Expedição
         const CANAIS = [
             "UC-lHJZR3Gqxm24_Vd_AJ5Yw", // Richard
             "UC0uYV778E2GTo6W8U6u220w", // Rato Borrachudo
-            "UCPY9OndS0GqL9YofV_8B9_w", // Renato Cariani
-            "UCxI-mD7-S1vshLh9LpX8Oog", // ACF Performance
+            "UCPY9OndS0GqL9YofV_8B9_w", // Cariani
+            "UCxI-mD7-S1vshLh9LpX8Oog", // ACF
             "UCX9H70qU1R3eK3c9NnOasTg", // Tonimek
             "UC57f9p_v0m3Gq80M09Hl_Bg"  // Gordox
         ];
 
-        let domain = window.location.hostname || "localhost";
+        const domain = "zikapr26.github.io"; // Seu domínio no GitHub
 
-        function forceLive() {
+        function syncCanais() {
             for(let i=0; i<CANAIS.length; i++) {
-                const box = document.getElementById('b'+(i+1));
-                const frame = document.getElementById('v'+(i+1));
-                const link = document.getElementById('l'+(i+1));
-                box.classList.remove('hide');
-                // Carrega o redirecionador automático de live
-                frame.src = `https://www.youtube.com/embed/live_stream?channel=${CANAIS[i]}&autoplay=1&mute=1`;
-                link.href = `https://www.youtube.com/channel/${CANAIS[i]}/live`;
+                const slot = i + 1;
+                const iframe = document.getElementById('v' + slot);
+                const chat = document.getElementById('f' + slot);
+                
+                // Força o carregamento da live atual do canal
+                iframe.src = "https://www.youtube.com/embed/live_stream?channel=" + CANAIS[i] + "&autoplay=1&mute=1";
+                
+                // Tenta carregar o chat (o chat só funciona se a live estiver ativa e permitir embed)
+                chat.src = "https://www.youtube.com/live_chat?v=default&embed_domain=" + domain;
+                
+                document.getElementById('b' + slot).classList.remove('hide');
             }
             setLayout(6);
         }
 
-        async function syncYoutube() {
-            const btn = document.querySelector('.btn-sync');
-            btn.innerText = "SINCRO...";
-            let encontrados = 0;
-            for(let i=1; i<=6; i++) document.getElementById('in'+i).value = "";
-
-            for (let i = 0; i < CANAIS.length; i++) {
-                try {
-                    let r = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CANAIS[i]}&type=video&eventType=live&key=${API_KEY}`);
-                    let d = await r.json();
-                    if (d.items?.length > 0) {
-                        encontrados++;
-                        const vid = d.items[0].id.videoId;
-                        document.getElementById('in' + encontrados).value = `https://www.youtube.com/watch?v=${vid}`;
-                    }
-                } catch (e) { console.log("Erro API"); }
-            }
-            if(encontrados > 0) carregar();
-            else alert("Nenhuma live 'oficial' encontrada. Tente o botão FORÇAR LIVE.");
-            btn.innerText = "SYNC API";
-        }
-
-        function carregar() {
+        function carregarManual() {
             for(let i=1; i<=6; i++) {
-                const val = document.getElementById('in'+i).value;
-                const box = document.getElementById('b'+i);
-                const frame = document.getElementById('v'+i);
-                const link = document.getElementById('l'+i);
+                const val = document.getElementById('in' + i).value;
                 if(val.includes("v=")) {
                     const id = val.split("v=")[1].split("&")[0];
-                    box.classList.remove('hide');
-                    frame.src = `https://www.youtube.com/embed/${id}?autoplay=1&mute=1`;
-                    link.href = `https://www.youtube.com/watch?v=${id}`;
-                    document.getElementById('f'+i).src = `https://www.youtube.com/live_chat?v=${id}&embed_domain=${domain}`;
-                } else {
-                    box.classList.add('hide');
-                    frame.src = "";
+                    document.getElementById('v' + i).src = "https://www.youtube.com/embed/" + id + "?autoplay=1&mute=1";
+                    document.getElementById('f' + i).src = "https://www.youtube.com/live_chat?v=" + id + "&embed_domain=" + domain;
+                    document.getElementById('b' + i).classList.remove('hide');
                 }
             }
-            setLayout(6);
         }
 
         function setLayout(n) {
-            const boxes = document.querySelectorAll('.video-box');
-            boxes.forEach(b => b.classList.add('hide'));
-            for(let i=1; i<=6; i++) {
-                const frame = document.getElementById('v'+i);
-                if(frame.src !== "" && !frame.src.includes("about:blank")) document.getElementById('b'+i).classList.remove('hide');
-            }
+            document.querySelectorAll('.video-box').forEach(b => {
+                const f = b.querySelector('iframe');
+                if(f.src && f.src !== "") b.classList.remove('hide');
+                else b.classList.add('hide');
+            });
         }
 
         function toggleFocus() {
             document.body.classList.toggle('focus-mode');
             const btn = document.getElementById('btnFocus');
             if (document.body.classList.contains('focus-mode')) {
-                btn.innerText = "SAIR FOCUS";
+                btn.innerText = "SAIR";
                 document.body.classList.add('menu-hidden');
             } else {
                 btn.innerText = "FOCUS";
                 showMenu();
             }
         }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "Escape") {
+                if (document.body.classList.contains('focus-mode')) toggleFocus();
+                else document.body.classList.add('menu-hidden');
+            }
+        });
 
         function showMenu() { document.body.classList.remove('menu-hidden'); }
         function startHideTimer() { hideTimer = setTimeout(() => document.body.classList.add('menu-hidden'), 2500); }
@@ -183,7 +165,7 @@
         function initResizeChat(e) { window.addEventListener('mousemove', resChat); window.addEventListener('mouseup', () => window.removeEventListener('mousemove', resChat)); }
         function resChat(e) {
             let v = window.innerWidth - e.clientX;
-            if(v > 150 && v < 600) { document.getElementById('chat-area').style.width = v + "px"; localStorage.setItem('chatWidth', v); }
+            if(v > 150 && v < 600) document.getElementById('chat-area').style.width = v + "px";
         }
     </script>
 </body>
