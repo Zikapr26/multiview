@@ -2,19 +2,20 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>MultiWatch - Expedição Helios (ULTIMATE)</title>
+    <title>MultiWatch - Expedição Helios (V3 FINAL)</title>
     <style>
         body { margin: 0; font-family: sans-serif; background: #000; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        #toolbar { position: fixed; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; z-index: 1000; pointer-events: none; height: 50px; }
+        #toolbar { position: fixed; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; z-index: 1000; pointer-events: none; height: 55px; }
         #menu-to-hide { background: #111; padding: 5px 15px; display: flex; gap: 8px; align-items: center; border: 1px solid #333; border-top: none; pointer-events: auto; transition: transform 0.3s ease; }
         .menu-hidden #menu-to-hide { transform: translateY(-100%); }
         #menu-persistent { background: #111; padding: 5px 15px; display: flex; gap: 10px; align-items: center; border: 1px solid #333; border-top: none; pointer-events: auto; }
         .group-inputs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
         input { background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 4px; border-radius: 4px; width: 90px; font-size: 10px; outline: none; }
-        button { background: #222; color: #eee; border: 1px solid #444; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold; }
+        button { background: #222; color: #eee; border: 1px solid #444; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold; }
         .btn-sync { background: #0055ff; border: none; color: white; }
-        .btn-red { background: #ff0000; border: none; }
-        #main-container { display: flex; flex: 1; width: 100%; overflow: hidden; margin-top: 50px; transition: margin-top 0.3s ease; }
+        .btn-force { background: #ffaa00; border: none; color: #000; }
+        .btn-red { background: #ff0000; border: none; color: white; }
+        #main-container { display: flex; flex: 1; width: 100%; overflow: hidden; margin-top: 55px; transition: margin-top 0.3s ease; }
         .menu-hidden #main-container { margin-top: 0 !important; }
         #content-area { display: flex; flex-direction: column; flex: 1; }
         .row { display: flex; flex: 1; min-height: 0; }
@@ -35,7 +36,10 @@
 
     <div id="toolbar">
         <div id="menu-to-hide" onmouseleave="startHideTimer()" onmouseenter="clearHideTimer()">
-            <button class="btn-sync" onclick="syncYoutube()">SYNC HELIOS</button>
+            <div style="display:flex; flex-direction:column; gap:2px;">
+                <button class="btn-sync" onclick="syncYoutube()">SYNC API</button>
+                <button class="btn-force" onclick="forceLive()">FORÇAR LIVE</button>
+            </div>
             <div class="group-inputs">
                 <input type="text" id="in1" placeholder="L1"><input type="text" id="in2" placeholder="L2"><input type="text" id="in3" placeholder="L3">
                 <input type="text" id="in4" placeholder="L4"><input type="text" id="in5" placeholder="L5"><input type="text" id="in6" placeholder="L6">
@@ -60,7 +64,8 @@
         <div id="content-area">
             <div id="row-up" class="row">
                 <div id="b1" class="video-box"><iframe id="v1"></iframe></div>
-                <div id="b2" class="video-box"><iframe id="b2_frame"></iframe></div> <div id="b3" class="video-box"><iframe id="v3"></iframe></div>
+                <div id="b2" class="video-box"><iframe id="v2"></iframe></div>
+                <div id="b3" class="video-box"><iframe id="v3"></iframe></div>
             </div>
             <div id="row-down" class="row">
                 <div id="b4" class="video-box"><iframe id="v4"></iframe></div>
@@ -92,44 +97,45 @@
 
         let domain = window.location.hostname || "localhost";
 
+        // MÉTODO INFALÍVEL: Tenta carregar a live atual do canal sem usar busca da API
+        function forceLive() {
+            for(let i=0; i<CANAIS.length; i++) {
+                const box = document.getElementById('b'+(i+1));
+                const frame = document.getElementById('v'+(i+1));
+                box.classList.remove('hide');
+                // O YouTube redireciona automaticamente para a live ativa com esse link
+                frame.src = `https://www.youtube.com/embed/live_stream?channel=${CANAIS[i]}&autoplay=1&mute=1`;
+            }
+            setLayout(6);
+            alert("Tentando sintonizar as lives dos 6 canais...");
+        }
+
         async function syncYoutube() {
             const btn = document.querySelector('.btn-sync');
             btn.innerText = "SINCRO...";
             let encontrados = 0;
-            
             for(let i=1; i<=6; i++) document.getElementById('in'+i).value = "";
 
             for (let i = 0; i < CANAIS.length; i++) {
                 try {
-                    // MÉTODO 1: Busca direta de Live
-                    let res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CANAIS[i]}&type=video&eventType=live&key=${API_KEY}`);
-                    let data = await res.json();
-                    
-                    if (data.items?.length > 0) {
+                    let r = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CANAIS[i]}&type=video&eventType=live&key=${API_KEY}`);
+                    let d = await r.json();
+                    if (d.items?.length > 0) {
                         encontrados++;
-                        document.getElementById('in' + encontrados).value = `https://www.youtube.com/watch?v=${data.items[0].id.videoId}`;
-                    } else {
-                        // MÉTODO 2: Busca por vídeo mais recente (backup)
-                        let res2 = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CANAIS[i]}&type=video&order=date&maxResults=1&key=${API_KEY}`);
-                        let data2 = await res2.json();
-                        if (data2.items?.[0]?.snippet?.liveBroadcastContent === 'live') {
-                            encontrados++;
-                            document.getElementById('in' + encontrados).value = `https://www.youtube.com/watch?v=${data2.items[0].id.videoId}`;
-                        }
+                        document.getElementById('in' + encontrados).value = `https://www.youtube.com/watch?v=${d.items[0].id.videoId}`;
                     }
-                } catch (e) { console.log("Erro no canal " + i); }
+                } catch (e) { console.log("Erro API"); }
             }
             if(encontrados > 0) carregar();
-            else alert("Nenhuma live ativa nos canais da lista.");
-            btn.innerText = "SYNC HELIOS";
+            else alert("Nenhuma live 'oficial' encontrada. Tente o botão FORÇAR LIVE.");
+            btn.innerText = "SYNC API";
         }
 
         function carregar() {
             for(let i=1; i<=6; i++) {
                 const val = document.getElementById('in'+i).value;
                 const box = document.getElementById('b'+i);
-                const frame = (i === 2) ? document.getElementById('b2_frame') : document.getElementById('v'+i);
-                
+                const frame = document.getElementById('v'+i);
                 if(val.includes("v=")) {
                     const id = val.split("v=")[1].split("&")[0];
                     box.classList.remove('hide');
@@ -149,9 +155,11 @@
             const boxes = document.querySelectorAll('.video-box');
             boxes.forEach(b => { b.classList.add('hide'); b.style.flex = "1"; });
             rowUp.style.display = "flex"; rowDown.style.display = "flex";
-
             if(n === 6) {
-                for(let i=1; i<=6; i++) if(document.getElementById('in'+i).value) document.getElementById('b'+i).classList.remove('hide');
+                for(let i=1; i<=6; i++) {
+                    const frame = document.getElementById('v'+i);
+                    if(frame.src !== "" && !frame.src.includes("about:blank")) document.getElementById('b'+i).classList.remove('hide');
+                }
             } else if(n === 4) {
                 [1,2,4,5].forEach(i => document.getElementById('b'+i).classList.remove('hide'));
             } else if(n === 3) {
@@ -165,7 +173,6 @@
             const btn = document.getElementById('btnFocus');
             if (document.body.classList.contains('focus-mode')) {
                 btn.innerText = "SAIR FOCUS";
-                if (!document.getElementById('chat-area').classList.contains('hide')) toggleChat();
                 document.body.classList.add('menu-hidden');
             } else {
                 btn.innerText = "FOCUS";
