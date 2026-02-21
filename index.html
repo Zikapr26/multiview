@@ -2,44 +2,39 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>MultiWatch - Expedição Helios</title>
+    <title>MultiWatch - Expedição Helios (6 Slots)</title>
     <style>
         body { margin: 0; font-family: sans-serif; background: #000; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* TOOLBAR */
         #toolbar { position: fixed; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; z-index: 1000; pointer-events: none; height: 50px; }
         #menu-to-hide { background: #111; padding: 5px 15px; display: flex; gap: 8px; align-items: center; border: 1px solid #333; border-top: none; pointer-events: auto; transition: transform 0.3s ease; }
         .menu-hidden #menu-to-hide { transform: translateY(-100%); }
         #menu-persistent { background: #111; padding: 5px 15px; display: flex; gap: 10px; align-items: center; border: 1px solid #333; border-top: none; pointer-events: auto; }
         
-        /* INPUTS */
         .group-inputs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
         input { background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 4px; border-radius: 4px; width: 90px; font-size: 10px; outline: none; }
         
-        /* BOTÕES */
         button { background: #222; color: #eee; border: 1px solid #444; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold; }
         button:hover { background: #333; }
         .btn-sync { background: #0055ff; border: none; color: white; }
         .btn-red { background: #ff0000; border: none; }
 
-        /* CONTAINERS */
         #main-container { display: flex; flex: 1; width: 100%; overflow: hidden; margin-top: 50px; transition: margin-top 0.3s ease; }
-        .menu-hidden #main-container { margin-top: 0; }
+        .menu-hidden #main-container { margin-top: 0 !important; }
         #content-area { display: flex; flex-direction: column; flex: 1; }
         .row { display: flex; flex: 1; min-height: 0; }
         .video-box { flex: 1; background: #000; border: 1px solid #111; position: relative; display: flex; }
-        iframe { width: 100%; height: 100%; border: none; }
+        iframe { width: 100%; height: 100%; border: none; background: #000; }
 
-        /* CHAT */
         #chat-area { width: 320px; min-width: 150px; background: #000; border-left: 1px solid #222; display: flex; flex-direction: column; }
         .chat-container { flex: 1; display: none; }
         .chat-active { display: block !important; }
         .hide { display: none !important; }
         
-        #menu-trigger { position: fixed; top: 0; left: 0; width: 100%; height: 15px; z-index: 1001; }
+        #menu-trigger { position: fixed; top: 0; left: 0; width: 100%; height: 15px; z-index: 1001; pointer-events: auto; }
         #gutter-chat { cursor: col-resize; width: 4px; background: #222; z-index: 10; }
         
-        .focus-mode #menu-persistent, .focus-mode #menu-to-hide { display: none; }
+        .focus-mode #menu-persistent { display: none; }
     </style>
 </head>
 <body class="menu-hidden">
@@ -57,7 +52,7 @@
             <button onclick="setLayout(6)">G6</button>
             <button onclick="setLayout(4)">G4</button>
             <button onclick="setLayout(3)">L3</button>
-            <button onclick="toggleFocus()">FOCUS</button>
+            <button id="btnFocus" onclick="toggleFocus()">FOCUS</button>
         </div>
 
         <div id="menu-persistent">
@@ -118,18 +113,32 @@
             btn.innerText = "BUSCANDO...";
             let encontrados = 0;
             
+            for(let i=1; i<=6; i++) document.getElementById('in'+i).value = "";
+
             for (let i = 0; i < CANAIS.length; i++) {
                 try {
-                    const r = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CANAIS[i]}&type=video&eventType=live&key=${API_KEY}`);
-                    const d = await r.json();
-                    if (d.items?.length > 0) {
+                    // Busca padrão por evento live
+                    let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CANAIS[i]}&type=video&eventType=live&maxResults=1&key=${API_KEY}`;
+                    let r = await fetch(url);
+                    let d = await r.json();
+                    
+                    if (d.items && d.items.length > 0) {
                         encontrados++;
                         document.getElementById('in' + encontrados).value = `https://www.youtube.com/watch?v=${d.items[0].id.videoId}`;
+                    } else {
+                        // Busca de backup: pega o vídeo mais recente e checa o status de transmissão
+                        let urlBackup = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CANAIS[i]}&type=video&order=date&maxResults=1&key=${API_KEY}`;
+                        let rb = await fetch(urlBackup);
+                        let db = await rb.json();
+                        if (db.items && db.items[0].snippet.liveBroadcastContent === 'live') {
+                            encontrados++;
+                            document.getElementById('in' + encontrados).value = `https://www.youtube.com/watch?v=${db.items[0].id.videoId}`;
+                        }
                     }
-                } catch (e) { console.error(e); }
+                } catch (e) { console.error("Erro no canal " + CANAIS[i], e); }
             }
             if(encontrados > 0) carregar();
-            else alert("Nenhuma live online agora.");
+            else alert("Nenhuma live ativa no momento.");
             btn.innerText = "SYNC HELIOS";
         }
 
@@ -151,14 +160,9 @@
         }
 
         function setLayout(n) {
-            const rowUp = document.getElementById('row-up');
-            const rowDown = document.getElementById('row-down');
             const boxes = document.querySelectorAll('.video-box');
-            
             boxes.forEach(b => { b.classList.add('hide'); b.style.flex = "1"; });
-            rowUp.style.display = "flex";
-            rowDown.style.display = "flex";
-
+            
             if(n === 6) {
                 for(let i=1; i<=6; i++) if(document.getElementById('in'+i).value) document.getElementById('b'+i).classList.remove('hide');
             } else if(n === 4) {
@@ -173,8 +177,29 @@
         function startHideTimer() { hideTimer = setTimeout(() => document.body.classList.add('menu-hidden'), 2500); }
         function clearHideTimer() { if (hideTimer) clearTimeout(hideTimer); }
         function toggleChat() { document.getElementById('chat-area').classList.toggle('hide'); document.getElementById('gutter-chat').classList.toggle('hide'); }
-        function toggleFocus() { document.body.classList.toggle('focus-mode'); }
         
+        function toggleFocus() {
+            document.body.classList.toggle('focus-mode');
+            const btn = document.getElementById('btnFocus');
+            if (document.body.classList.contains('focus-mode')) {
+                btn.innerText = "SAIR FOCUS";
+                btn.style.background = "#ffaa00";
+                if (!document.getElementById('chat-area').classList.contains('hide')) toggleChat();
+                document.body.classList.add('menu-hidden');
+            } else {
+                btn.innerText = "FOCUS";
+                btn.style.background = "#222";
+                showMenu();
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "Escape") {
+                if (document.body.classList.contains('focus-mode')) toggleFocus();
+                else document.body.classList.add('menu-hidden');
+            }
+        });
+
         function swapChat(n) {
             document.querySelectorAll('.chat-container').forEach(c => c.classList.remove('chat-active'));
             document.getElementById('chat-c' + n).classList.add('chat-active');
